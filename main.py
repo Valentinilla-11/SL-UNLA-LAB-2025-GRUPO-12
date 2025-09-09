@@ -1,21 +1,22 @@
 from fastapi import FastAPI, HTTPException, status
 from database import session
 from models import Persona
+from database import PersonaDB
 
 app = FastAPI()
 
 @app.get("/")
 async def hola_mundo():
-    return {"msg: Todo funciona"}
+    return {"msg": "Todo funciona"}
 
 @app.get("/personas") 
-async def listar_personas(session): 
-    personas = Persona.query.all() 
-    return [vars(p) for p in personas]
+async def listar_personas(): 
+    personas = session.query(PersonaDB).all() 
+    return personas
 
 @app.post("/personas",  status_code=status.HTTP_201_CREATED) 
-def crear_persona(persona:Persona, session): 
-    persona_nueva = Persona( 
+def crear_persona(persona: Persona):
+    persona_nueva = PersonaDB( 
         nombre=persona.nombre, 
         email=persona.email,
         dni=persona.dni,

@@ -5,7 +5,7 @@ engine = create_engine('sqlite:///tp_python.db')
 
 Base = declarative_base() 
 
-class Persona(Base):
+class PersonaDB(Base):
     __tablename__ = "personas"
 
     id = Column(Integer, primary_key=True)
