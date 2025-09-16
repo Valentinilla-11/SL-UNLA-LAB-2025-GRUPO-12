@@ -26,7 +26,7 @@ class PersonaCreate(BaseModel):
 
     @field_validator("dni")
     @classmethod
-    def dni_valido(cls, dniIngresado: int) -> bool:
+    def dni_valido(cls, dniIngresado: int) -> int:
         if dniIngresado <=0 or len(str(dniIngresado)) < 7 or len(str(dniIngresado)) > 8:
             raise ValueError("DNI invalido")
         return dniIngresado

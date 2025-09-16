@@ -8,81 +8,332 @@
 	"item": [
 		{
 			"name": "CRUD-Persona",
-			"item": []
+			"item": [
+				{
+					"name": "postPersona",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2001-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersona2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Rocio Pérez\",\r\n    \"email\": \"rociop@gmail.com\",\r\n    \"dni\": 44587412,\r\n    \"telefono\": 1125423594,\r\n    \"fechaNacimiento\": \"2002-10-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorDniDuplicado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl2@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaDniInvalido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl3@gmail.com\",\r\n    \"dni\": 43545,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaFechaInvalida",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2029-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorMailDuplicado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 42546754,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorMailInvalido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl\",\r\n    \"dni\": 42545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaMissingField",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonaById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonaByIdNoEncontrada",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePersona",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8000/personas/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePersonaNoEncontrada",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8000/personas/56",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"56"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "root",
 			"request": {
 				"method": "GET",
 				"header": []
-			},
-			"response": []
-		},
-		{
-			"name": "postPersonaMissingField",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:8000/personas",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"personas"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "getPersonas",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:8000/personas",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"personas"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "deletePersona",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "localhost:8000/personas/2",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"personas",
-						"2"
-					]
-				}
 			},
 			"response": []
 		}
