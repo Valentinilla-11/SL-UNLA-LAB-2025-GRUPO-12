@@ -10,13 +10,12 @@ class PersonaDB(Base):
     __tablename__ = "personas"
 
     id = Column(Integer, primary_key=True)
-    nombre = Column(String)
-    email = Column(String)
-    dni = Column(Integer, unique=True)
-    telefono = Column(Integer)
-    fechaNacimiento = Column(Date)
-    edad = Column(Integer)
-    estado = Column(Boolean, default=True)
+    nombre = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    dni = Column(Integer, nullable=False, unique=True)
+    telefono = Column(Integer, nullable=False)
+    fechaNacimiento = Column(Date, nullable=False)
+    habilitado = Column(Boolean, nullable=False, default=True)
 
 class TurnoDB(Base):
     __tablename__ = "turnos"
