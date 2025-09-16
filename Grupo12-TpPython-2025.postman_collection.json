@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "0f8a8b5b-6602-4938-a54f-af3f7cccfa75",
+		"name": "Grupo12-TpPython-2025",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16622049"
+	},
+	"item": [
+		{
+			"name": "CRUD-Persona",
+			"item": []
+		},
+		{
+			"name": "root",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "postPersonaMissingField",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/personas",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"personas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getPersonas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/personas",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"personas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deletePersona",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8000/personas/2",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"personas",
+						"2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
