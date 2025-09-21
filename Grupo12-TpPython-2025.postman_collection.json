@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "0f8a8b5b-6602-4938-a54f-af3f7cccfa75",
+		"_postman_id": "73e6ef95-eb94-4b16-809e-fc65f6d2c62b",
 		"name": "Grupo12-TpPython-2025",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "16622049"
+		"_exporter_id": "48297487",
+		"_collection_link": "https://lucioo-martinn-9781786.postman.co/workspace/Lucio-Karabetian's-Workspace~76d2be8a-017b-4a99-820e-0555ea7247a6/collection/48297487-73e6ef95-eb94-4b16-809e-fc65f6d2c62b?action=share&source=collection_link&creator=48297487"
 	},
 	"item": [
 		{
@@ -330,10 +331,129 @@
 			]
 		},
 		{
+			"name": "CRUD-Turno",
+			"item": [
+				{
+					"name": "postTurnos",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fecha\": \"2025-10-12\",\r\n    \"hora\": \"12:30\",\r\n    \"id_persona\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/turnos",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"turnos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonas",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Pepito Contreras\",\r\n    \"email\": \"pepito@gmail.com\",\r\n    \"dni\": 43545612,\r\n    \"telefono\": 1121452122,\r\n    \"fechaNacimiento\": \"2001-05-28\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putTurnos",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fecha\": \"2025-10-13\",\r\n    \"hora\": \"10:30\",\r\n    \"id_persona\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/turnos/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteTurnos",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/turnos/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "root",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": ""
+				}
 			},
 			"response": []
 		}

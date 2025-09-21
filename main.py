@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, status
-from models import PersonaCreate, PersonaOut
-from database import session, PersonaDB
-from utils import to_persona_out
+from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate
+from database import session, PersonaDB, TurnoDB
+from utils import to_persona_out, to_turno_out
 from sqlalchemy.exc import IntegrityError
+from datetime import time
+
 
 app = FastAPI()
 
@@ -75,3 +77,75 @@ def eliminar_persona(id: int):
         session.rollback()
         raise HTTPException(status_code=400, detail="Error al eliminar la persona.")
     return
+
+@app.put("/personas/{id}", response_model=PersonaOut)
+def modificar_persona(id:int, persona:PersonaCreate):
+    personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+    if personaCambio is None:
+        raise HTTPException(status_code=404, detail="Persona no encontrada.")
+    personaCambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
+    personaCambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
+    personaCambio.dni = persona.dni #if personaCambio.dni is not None else None
+    personaCambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
+    personaCambio.fechaNacimiento = persona.fechaNacimiento #if personaCambio.fechaNacimiento is not None else None
+    try:
+        session.commit()
+        session.refresh(personaCambio)
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al modificar la persona.")
+
+    return to_persona_out(personaCambio)
+
+@app.post("/turnos", status_code=status.HTTP_201_CREATED)
+def crear_turno(turno:TurnoCreate):
+    turno_nuevo = TurnoDB(
+        fecha = turno.fecha,
+        hora= turno.hora, 
+        id_persona = turno.id_persona
+    )
+
+    session.add(turno_nuevo)
+    try:
+        session.commit()
+        session.refresh(turno_nuevo)
+    except:
+        session.rollback()
+        raise HTTPException (status_code=400, detail="Error al crear un turno")
+    return vars(turno_nuevo)
+
+@app.put("/turnos/{id}", response_model=TurnoOut)
+def modificar_Turno(id:int, turno:TurnoCreate):
+    turnoCambio = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+    if turnoCambio is None:
+        raise HTTPException(status_code=404, detail="Turno no encontrado.")
+    turnoCambio.fecha = turno.fecha #if turnoCambio.fecha is not None else None
+    turnoCambio.hora = turno.hora #if turnoCambio.hora is not None else None
+    turnoCambio.estado = turno.estado #if turno.estado is not None else None
+    turnoCambio.id_persona = turno.id_persona #if turnoCambio.id_persona is not None else None
+    try:
+        session.commit()
+        session.refresh(turnoCambio)
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al modificar el turno.")
+
+    return to_turno_out(turnoCambio)
+
+@app.delete("/turnos/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_turno(id: int):
+    turno = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+    if not turno:
+        raise HTTPException(status_code=404, detail="Turno no encontrado.")
+    session.delete(turno)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al eliminar el turno.")
+    return
+
+
+
+    
+    

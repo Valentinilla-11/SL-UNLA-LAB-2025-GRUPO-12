@@ -1,7 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey, Time, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker 
 
 engine = create_engine('sqlite:///tp_python.db') 
+
 
 Base = declarative_base()
 
@@ -16,16 +17,16 @@ class PersonaDB(Base):
     telefono = Column(Integer, nullable=False)
     fechaNacimiento = Column(Date, nullable=False)
     habilitado = Column(Boolean, nullable=False, default=True)
+    #turnos = relationship("TurnoDB", back_populates="persona")
 
 class TurnoDB(Base):
     __tablename__ = "turnos"
-
     id = Column(Integer, primary_key=True)
     fecha = Column(Date)
-    hora = Column(String)
-    estado = Column(String, default="PENDIENTE")
+    hora = Column(Time)
+    estado = Column(Enum("PENDIENTE", "CONFIRMADO", "CANCELADO", "ASISTIDO", name="estado_enum"), default="PENDIENTE")
     id_persona = Column(Integer, ForeignKey("personas.id"))
-
+    #persona = relationship("PersonaDB", back_populates="turnos")
 Base.metadata.create_all(engine) 
 
 Session = sessionmaker(bind=engine) 

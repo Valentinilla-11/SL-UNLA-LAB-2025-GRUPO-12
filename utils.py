@@ -1,6 +1,6 @@
-from datetime import date
-from models import PersonaOut
-from database import PersonaDB
+from datetime import date, timedelta
+from models import PersonaOut, TurnoOut
+from database import PersonaDB, TurnoDB, session 
 
 def calcular_edad(fechaNacimiento: date) -> int:
     hoy = date.today()
@@ -22,3 +22,21 @@ def to_persona_out(p: PersonaDB) -> PersonaOut:
         edad=calcular_edad(p.fechaNacimiento),
         habilitado=p.habilitado
     )
+
+def to_turno_out(t: TurnoDB) -> TurnoOut:
+    return TurnoOut(
+        id=t.id,
+        fecha=t.fecha,
+        hora=t.hora,
+        estado=t.estado,
+        id_persona=t.id_persona
+
+    )
+def puede_solicitar_turno(persona_id: int) -> bool:
+    seis_meses_atras = date.today() - timedelta(days=180)
+    cancelados = session.query(TurnoDB).filter(
+        TurnoDB.persona_id == persona_id,
+        TurnoDB.estado == "cancelado",
+        TurnoDB.fecha >= seis_meses_atras
+    ).count()
+    return cancelados < 5

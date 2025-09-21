@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, constr, field_validator
-from datetime import date
+from datetime import date, time
 from typing import Annotated, Optional
 import enum
 
@@ -57,12 +57,12 @@ class PersonaOut(BaseModel):
         orm_mode = True
 
 # Clase para un patch
-# class personaUpdate(BaseModel):
-#    nombre: Optional[NombreStr] = None
-#    email: Optional[EmailStr] = None
-#    dni: Optional[int] = None
-#    telefono: Optional[int] = None
-#    fechaNacimiento: Optional[date] = None
+class PersonaUpdate(BaseModel):
+    nombre: Optional[NombreStr] 
+    email: Optional[EmailStr] 
+    dni: Optional[int] 
+    telefono: Optional[int] 
+    fechaNacimiento: Optional[date]
 
 # ---------- TURNOS -------------
 
@@ -72,12 +72,25 @@ class EstadoEnum(str, enum.Enum):
     CANCELADO = "CANCELADO"
     ASISTIDO = "ASISTIDO"
 
-class Turno(BaseModel):
+class TurnoCreate(BaseModel):
     fecha: date
-    hora: str
-    estado: EstadoEnum = EstadoEnum.PENDIENTE
+    hora: time
+    estado: EstadoEnum=EstadoEnum.PENDIENTE
+    id_persona: int  # Solo se envía el ID, no el objeto completo
+
+class TurnoOut(BaseModel):
+    id: int
+    fecha: date
+    hora: time
+    estado: str
     id_persona: int
-    class Config:
-        orm_mode = True
+
+class TurnoUpdate(BaseModel):
+    fecha: Optional[date]
+    hora: Optional[time]
+    estado: Optional[EstadoEnum]
+    id_persona: Optional[int]
+
+
 
     
