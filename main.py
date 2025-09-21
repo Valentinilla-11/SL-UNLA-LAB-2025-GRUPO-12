@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, status
 from database import TurnoDB, session
 from models import Persona, Turno
@@ -67,8 +68,25 @@ def traer_turno_id(id:int):
     return turno
 
 
-
+#leo los horarios del json
 def leer_horarios ():
     with open ("horarios.json", "r", encoding= "utf-8") as archivo:
         horarios = json.load (archivo)
         horarios_posibles = horarios ["horarios"]
+        return horarios_posibles
+
+
+@app.get("/turnos-disponibles")
+def traer_turnos_disponibles (fecha: str):
+
+    fecha_date = datetime.strptime (fecha, "%Y-%m-%d").date() #paso a date
+    #guardo los turnos cargados en la bd
+    ocupados = session.query(TurnoDB).filter( 
+        TurnoDB.fecha == fecha_date, TurnoDB.estado != "Cancelado"
+    ).all()
+
+    tomados_horas = [ocupado.hora for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
+    horarios_disponibles = leer_horarios ()
+    turnos_disponibles = [horario for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
+    
+    return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
