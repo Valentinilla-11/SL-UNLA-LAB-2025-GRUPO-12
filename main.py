@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from database import TurnoDB, session
 from models import Persona, Turno
@@ -42,7 +42,48 @@ async def listar_turnos_tomados():
     return turnos
 
 @app.post("/turno", status_code=status.HTTP_201_CREATED)
-def crear_turno(turno:Turno):
+def crear_turno(turno: Turno):
+
+    #calcular los 6 meses sin cancelar turnos de una persona
+    persona = session.query (PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
+    if not persona:
+        raise HTTPException(status_code = 400, detail = "La persona a la que se le quiere asignar un turno, no esta cargada en la base de datos")
+    
+    limite_fecha = datetime.now() - timedelta(days=180)
+
+    cancelados_persona = session.query(TurnoDB).filter(
+        TurnoDB.id_persona == persona.id, 
+        TurnoDB.estado == "Cancelado", 
+        TurnoDB.fecha >= limite_fecha
+    ).count()
+
+    if cancelados_persona >= 5:
+        raise HTTPException (status_code = 400, detail = "La persona tiene 5 o mas turnos cancelados en los ultimos 6 meses por lo que no puese solicitar un nuevo turno por el momneto")
+    
+    #verifico si el turno ya fue tomado
+    #fecha_date = datetime.strptime (turno.fecha, "%Y-%m-%d").date() #paso a date
+    turno_tomado = session.query(TurnoDB).filter(
+        TurnoDB.fecha == turno.fecha,
+        TurnoDB.hora == turno.hora,
+        TurnoDB.estado != "Cancelado"
+    ).first ()
+
+    if turno_tomado :
+        raise HTTPException (status_code = 400, detail ="El turno ya esta tomado en esa fecha y hora")
+    
+    #creo un nuevo turno 
+
+    #verifico la hora 
+    lista_horarios = leer_horarios ()
+    
+    if turno.hora not in lista_horarios :
+        raise HTTPException (status_code = 400, detail = "El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora!")
+    
+    if turno.fecha < datetime.now():
+        raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
+    
+
+    #si pasa los errores, se crea el turno en la base
     turno_nuevo = TurnoDB(
         fecha = turno.fecha,
         hora= turno.hora, 
