@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "73e6ef95-eb94-4b16-809e-fc65f6d2c62b",
+		"_postman_id": "f41a34a3-c904-429c-bc91-4ecd7d3556b0",
 		"name": "Grupo12-TpPython-2025",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "48297487",
-		"_collection_link": "https://lucioo-martinn-9781786.postman.co/workspace/Lucio-Karabetian's-Workspace~76d2be8a-017b-4a99-820e-0555ea7247a6/collection/48297487-73e6ef95-eb94-4b16-809e-fc65f6d2c62b?action=share&source=collection_link&creator=48297487"
+		"_exporter_id": "16622049"
 	},
 	"item": [
 		{
@@ -331,26 +330,24 @@
 			]
 		},
 		{
-			"name": "CRUD-Turno",
+			"name": "CRUD-Turnos",
 			"item": [
 				{
-					"name": "postTurnos",
+					"name": "GetTurnos",
 					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"fecha\": \"2025-10-12\",\r\n    \"hora\": \"12:30\",\r\n    \"id_persona\": 1\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+						"auth": {
+							"type": "noauth"
 						},
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "localhost:8000/turnos",
+							"raw": "http://127.0.0.1:8000/turnos",
+							"protocol": "http",
 							"host": [
-								"localhost"
+								"127",
+								"0",
+								"0",
+								"1"
 							],
 							"port": "8000",
 							"path": [
@@ -361,13 +358,16 @@
 					"response": []
 				},
 				{
-					"name": "putPersonas",
+					"name": "PostTurnoOk",
 					"request": {
-						"method": "PUT",
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Pepito Contreras\",\r\n    \"email\": \"pepito@gmail.com\",\r\n    \"dni\": 43545612,\r\n    \"telefono\": 1121452122,\r\n    \"fechaNacimiento\": \"2001-05-28\"\r\n}",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"15:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -375,27 +375,33 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8000/personas/1",
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
+								"127",
+								"0",
+								"0",
 								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "putTurnos",
+					"name": "PostTurnoPersonaConCancelados",
 					"request": {
-						"method": "PUT",
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"fecha\": \"2025-10-13\",\r\n    \"hora\": \"10:30\",\r\n    \"id_persona\": 2\r\n}",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"14:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -403,27 +409,33 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8000/turnos/4",
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
 							"host": [
-								"localhost"
+								"127",
+								"0",
+								"0",
+								"1"
 							],
 							"port": "8000",
 							"path": [
-								"turnos",
-								"4"
+								"turno"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "deleteTurnos",
+					"name": "PostTurnoPersonaNoCargada",
 					"request": {
-						"method": "DELETE",
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 6\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -431,14 +443,306 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8000/turnos/4",
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
 							"host": [
-								"localhost"
+								"127",
+								"0",
+								"0",
+								"1"
 							],
 							"port": "8000",
 							"path": [
-								"turnos",
-								"4"
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoYaTomado",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoHoraFueraDelHorarioPermitido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoConFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTurnoById",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesTodos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-01",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesAlgunos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-21",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTurnoByIdInvalido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/99",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoEstadoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/1?estado=Cancelado",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"1"
+							],
+							"query": [
+								{
+									"key": "estado",
+									"value": "Cancelado"
+								}
 							]
 						}
 					},
@@ -452,7 +756,11 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": ""
+					"raw": "localhost:8000",
+					"host": [
+						"localhost"
+					],
+					"port": "8000"
 				}
 			},
 			"response": []
