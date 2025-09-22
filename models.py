@@ -41,3 +41,6 @@ class TurnoUpdate(BaseModel):
     estado: Optional[EstadoEnum]
     id_persona: Optional[int]
     
+#para patch de estado
+class TurnoEstadoUpdate(BaseModel):
+    estado: EstadoEnum

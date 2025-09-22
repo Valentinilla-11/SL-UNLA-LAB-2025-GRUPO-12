@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from database import TurnoDB, session
-from models import Persona, TurnoCreate, TurnoOut
+from models import Persona, TurnoCreate, TurnoEstadoUpdate, TurnoOut
 from database import PersonaDB
 import json
+from sqlalchemy import func
 
 app = FastAPI()
 
@@ -53,7 +54,7 @@ def crear_turno(turno: TurnoCreate):
 
     cancelados_persona = session.query(TurnoDB).filter(
         TurnoDB.id_persona == persona.id, 
-        TurnoDB.estado == "Cancelado", 
+        func.lower(TurnoDB.estado) == "cancelado",  
         TurnoDB.fecha >= limite_fecha
     ).count()
 
@@ -132,3 +133,20 @@ def traer_turnos_disponibles (fecha: str):
     turnos_disponibles = [horario for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
+
+
+@app.patch("/turno/{id}", response_model=TurnoOut)
+def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
+    turno = session.get(TurnoDB, id)
+    if not turno:
+        raise HTTPException(status_code=404, detail="Turno no encontrado")
+
+    turno.estado = turno_update.estado.value 
+    try:
+        session.commit()
+        session.refresh(turno)
+    except:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al actualizar el estado del turno")
+
+    return turno
