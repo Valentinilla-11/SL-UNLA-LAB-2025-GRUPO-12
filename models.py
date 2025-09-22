@@ -1,5 +1,6 @@
+from typing import Optional
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, time
 import enum
 
 class EstadoEnum(str, enum.Enum):
@@ -19,12 +20,24 @@ class Persona(BaseModel):
     class Config:
         orm_mode = True
 
-class Turno(BaseModel):
+class TurnoCreate(BaseModel):
     fecha: date
-    hora: str
-    estado: EstadoEnum = EstadoEnum.PENDIENTE
+    hora: time
+    estado: EstadoEnum=EstadoEnum.PENDIENTE
+    id_persona: int  # Solo se envía el ID, no el objeto completo
+
+class TurnoOut(BaseModel):
+    id: int
+    fecha: date
+    hora: time
+    estado: str
     id_persona: int
     class Config:
         orm_mode = True
 
+class TurnoUpdate(BaseModel):
+    fecha: Optional[date]
+    hora: Optional[time]
+    estado: Optional[EstadoEnum]
+    id_persona: Optional[int]
     

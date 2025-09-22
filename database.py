@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey, Time
 from sqlalchemy.orm import declarative_base, sessionmaker 
 
 engine = create_engine('sqlite:///tp_python.db') 
@@ -23,7 +23,7 @@ class TurnoDB(Base):
 
     id = Column(Integer, primary_key=True)
     fecha = Column(Date)
-    hora = Column(String)
+    hora = Column(Time, nullable = False)
     estado = Column(String, default="PENDIENTE")
     id_persona = Column(Integer, ForeignKey("personas.id"))
 

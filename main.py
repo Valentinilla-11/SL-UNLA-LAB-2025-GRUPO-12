@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from database import TurnoDB, session
-from models import Persona, Turno
+from models import Persona, TurnoCreate, TurnoOut
 from database import PersonaDB
 import json
 
@@ -36,13 +36,13 @@ def crear_persona(persona: Persona):
     return vars(persona_nueva) 
 
 
-@app.get("/turnos")
+@app.get("/turnos", response_model=list[TurnoOut])
 async def listar_turnos_tomados():
     turnos = session.query(TurnoDB).all()
     return turnos
 
 @app.post("/turno", status_code=status.HTTP_201_CREATED)
-def crear_turno(turno: Turno):
+def crear_turno(turno: TurnoCreate):
 
     #calcular los 6 meses sin cancelar turnos de una persona
     persona = session.query (PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
@@ -61,7 +61,6 @@ def crear_turno(turno: Turno):
         raise HTTPException (status_code = 400, detail = "La persona tiene 5 o mas turnos cancelados en los ultimos 6 meses por lo que no puese solicitar un nuevo turno por el momneto")
     
     #verifico si el turno ya fue tomado
-    #fecha_date = datetime.strptime (turno.fecha, "%Y-%m-%d").date() #paso a date
     turno_tomado = session.query(TurnoDB).filter(
         TurnoDB.fecha == turno.fecha,
         TurnoDB.hora == turno.hora,
@@ -73,13 +72,15 @@ def crear_turno(turno: Turno):
     
     #creo un nuevo turno 
 
-    #verifico la hora 
-    lista_horarios = leer_horarios ()
+    #verifico la hora
+    lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
     
     if turno.hora not in lista_horarios :
-        raise HTTPException (status_code = 400, detail = "El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora!")
+        raise HTTPException (status_code = 400, detail = "El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora, desde las 09:00 hasta las 17:00")
     
-    if turno.fecha < datetime.now():
+    #la fecha no podria ser anterior al dia en que se toma el turno
+    fecha_actual = datetime.now()
+    if turno.fecha < fecha_actual.date():
         raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
     
 
@@ -101,7 +102,7 @@ def crear_turno(turno: Turno):
     return vars(turno_nuevo)
 
 
-@app.get("/turno/{id}")
+@app.get("/turno/{id}", response_model=TurnoOut)
 def traer_turno_id(id:int):
     turno = session.get(TurnoDB, id)
     if not turno:
