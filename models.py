@@ -84,12 +84,15 @@ class TurnoOut(BaseModel):
     hora: time
     estado: str
     id_persona: int
+    class Config:
+        orm_mode = True
 
-class TurnoUpdate(BaseModel):
-    fecha: Optional[date]
-    hora: Optional[time]
-    estado: Optional[EstadoEnum]
-    id_persona: Optional[int]
+# clase para el PATCH de Turno
+# class TurnoUpdate(BaseModel):
+#    fecha: Optional[date]
+#    hora: Optional[time]
+#    estado: Optional[EstadoEnum]
+#    id_persona: Optional[int]
 
 
 
