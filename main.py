@@ -1,40 +1,104 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
-from database import TurnoDB, session
-from models import Persona, PersonaOut, TurnoConPersonaOut, TurnoCreate, TurnoEstadoUpdate, TurnoOut
-from database import PersonaDB
+from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
+from database import session, PersonaDB, TurnoDB
+from utils import to_persona_out, to_turno_out, calcular_edad
+from sqlalchemy.exc import IntegrityError
+from datetime import time
 import json
 from sqlalchemy import func
 
 app = FastAPI()
 
 @app.get("/")
-async def hola_mundo():
-    return {"msg": "Todo funciona"}
+async def root():
+    return {"msg": "API funcionando"}
 
-@app.get("/personas") 
-async def listar_personas(): 
-    personas = session.query(PersonaDB).all() 
-    return personas
 
-@app.post("/personas",  status_code=status.HTTP_201_CREATED) 
-def crear_persona(persona: Persona):
+@app.post("/personas", response_model=PersonaOut ,status_code=status.HTTP_201_CREATED) 
+def crear_persona(persona: PersonaCreate):
+
+    dniValido = session.query(PersonaDB).filter(PersonaDB.dni == persona.dni).first()
+    if dniValido:
+        raise HTTPException(status_code=409, detail="El número de DNI ya está registrado.")
+
+    emailValido = session.query(PersonaDB).filter(PersonaDB.email == persona.email).first()
+    if emailValido:
+        raise HTTPException(status_code=409, detail="El email ya está registrado.")
+
     persona_nueva = PersonaDB( 
-        nombre=persona.nombre, 
-        email=persona.email,
+        nombre=persona.nombre.strip(), 
+        email=persona.email.lower().strip(),
         dni=persona.dni,
         telefono=persona.telefono,
         fechaNacimiento=persona.fechaNacimiento,
-        edad=persona.edad, 
     ) 
-    session.add(persona_nueva) 
-    try: 
-        session.commit() 
-        session.refresh(persona_nueva) 
-    except: 
-        session.rollback() 
-        raise HTTPException(status_code=400, detail="Error al crear persona (email duplicado o datos inválidos)") 
-    return vars(persona_nueva) 
+    session.add(persona_nueva)
+    try: # Intenta guardar la persona en la db
+        session.commit()
+        session.refresh(persona_nueva)
+    except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
+        session.rollback()
+        msg = str(e.orig).lower()
+        if "dni" in msg:
+            raise HTTPException(status_code=409, detail="El DNI ya está registrado.")
+        if "email" in msg:
+            raise HTTPException(status_code=409, detail="El email ya está registrado.")
+        raise HTTPException(status_code=400, detail="No se pudo crear la persona (error de integridad).")
+    except Exception : # Otro error
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al crear la persona.")
+    return to_persona_out(persona_nueva)
+
+
+@app.get("/personas/{id}", response_model=PersonaOut, status_code=status.HTTP_200_OK)
+def listar_persona_por_id(id: int):
+    persona = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona no encontrada.")
+    return to_persona_out(persona)
+
+
+@app.get("/personas") 
+def listar_personas(): 
+    personas = session.query(PersonaDB).all()
+    personasResponse: list[PersonaOut] = []
+    for persona in personas:
+        personasResponse.append(to_persona_out(persona))
+    return personasResponse
+
+@app.delete("/personas/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_persona(id: int):
+    persona = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona no encontrada.")
+    session.delete(persona)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al eliminar la persona.")
+    return
+
+@app.put("/personas/{id}", response_model=PersonaOut)
+def modificar_persona(id:int, persona:PersonaCreate):
+    personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+    if personaCambio is None:
+        raise HTTPException(status_code=404, detail="Persona no encontrada.")
+    personaCambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
+    personaCambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
+    personaCambio.dni = persona.dni #if personaCambio.dni is not None else None
+    personaCambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
+    personaCambio.fechaNacimiento = persona.fechaNacimiento #if personaCambio.fechaNacimiento is not None else None
+    try:
+        session.commit()
+        session.refresh(personaCambio)
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al modificar la persona.")
+
+    return to_persona_out(personaCambio)
+
 
 #Post turno
 @app.post("/turno", response_model=TurnoConPersonaOut, status_code=status.HTTP_201_CREATED)
@@ -95,7 +159,6 @@ def crear_turno(turno: TurnoCreate):
     except:
         session.rollback()
         raise HTTPException (status_code=400, detail="Error al crear un turno")
-    
     #devuelvo con algunos de los datos de la persona
     return TurnoConPersonaOut(
         id=turno_nuevo.id,
@@ -107,9 +170,41 @@ def crear_turno(turno: TurnoCreate):
             nombre=persona.nombre,
             dni=persona.dni,
             fechaNacimiento=persona.fechaNacimiento,
-            edad=persona.edad
+            edad=calcular_edad(persona.fechaNacimiento)
         )
 )
+
+@app.put("/turnos/{id}", response_model=TurnoOut)
+def modificar_Turno(id:int, turno:TurnoCreate):
+    turnoCambio = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+    if turnoCambio is None:
+        raise HTTPException(status_code=404, detail="Turno no encontrado.")
+    turnoCambio.fecha = turno.fecha #if turnoCambio.fecha is not None else None
+    turnoCambio.hora = turno.hora #if turnoCambio.hora is not None else None
+    turnoCambio.estado = turno.estado #if turno.estado is not None else None
+    turnoCambio.id_persona = turno.id_persona #if turnoCambio.id_persona is not None else None
+    try:
+        session.commit()
+        session.refresh(turnoCambio)
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al modificar el turno.")
+
+    return to_turno_out(turnoCambio)
+
+@app.delete("/turnos/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_turno(id: int):
+    turno = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+    if not turno:
+        raise HTTPException(status_code=404, detail="Turno no encontrado.")
+    session.delete(turno)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al eliminar el turno.")
+    return
+
 
 #Get todos los turnos
 @app.get("/turnos", response_model=list[TurnoOut])
@@ -143,14 +238,26 @@ def traer_turnos_disponibles (fecha: str):
     if fecha_date < fecha_actual.date():
         raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
     
-    #guardo los turnos cargados en la bd
-    ocupados = session.query(TurnoDB).filter( 
-        TurnoDB.fecha == fecha_date, TurnoDB.estado != "Cancelado"
+    def to_time(val):
+        if isinstance(val, time):
+            return val
+            # val es string "HH:MM" o "HH:MM:SS"
+        fmt = "%H:%M:%S" if len(val) == 8 else "%H:%M"
+        return datetime.strptime(val, fmt).time()
+
+    ocupados = session.query(TurnoDB).filter(
+        TurnoDB.fecha == fecha_date,
+        TurnoDB.estado != "Cancelado"
     ).all()
 
-    tomados_horas = [ocupado.hora for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
-    horarios_disponibles = leer_horarios ()
-    turnos_disponibles = [horario for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
+    #guardo los turnos cargados en la bd
+    ocupados = session.query(TurnoDB).filter( 
+        TurnoDB.fecha == fecha_date, TurnoDB.estado != "CANCELADO"
+    ).all()
+
+    tomados_horas = [to_time(ocupado.hora) for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
+    horarios_disponibles = [to_time(h) for h in leer_horarios ()]
+    turnos_disponibles = [horario.strftime("%H:%M") for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
 

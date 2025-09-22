@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "74cc88ce-894c-4e78-b8ed-f108ce77f1a3",
+		"_postman_id": "f41a34a3-c904-429c-bc91-4ecd7d3556b0",
 		"name": "Grupo12-TpPython-2025",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "48622647",
-		"_collection_link": "https://morenarioscarnevale5-6031694.postman.co/workspace/Morena-Rios-Carnevale's-Workspa~3602c8f9-d514-44c5-8cd2-286ab0adc738/collection/48622647-74cc88ce-894c-4e78-b8ed-f108ce77f1a3?action=share&source=collection_link&creator=48622647"
+		"_exporter_id": "16622049"
 	},
 	"item": [
 		{
@@ -368,7 +367,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"11:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"15:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -470,7 +469,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -504,7 +503,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -538,7 +537,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -597,7 +596,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-28",
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -612,7 +611,7 @@
 							"query": [
 								{
 									"key": "fecha",
-									"value": "2025-09-28"
+									"value": "2025-09-23"
 								}
 							]
 						}
@@ -726,7 +725,7 @@
 							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/5?estado=Cancelado",
+							"raw": "http://127.0.0.1:8000/turno/1?estado=Cancelado",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -737,7 +736,7 @@
 							"port": "8000",
 							"path": [
 								"turno",
-								"5"
+								"1"
 							],
 							"query": [
 								{
@@ -757,7 +756,11 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": ""
+					"raw": "localhost:8000",
+					"host": [
+						"localhost"
+					],
+					"port": "8000"
 				}
 			},
 			"response": []
