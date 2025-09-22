@@ -123,6 +123,12 @@ def leer_horarios ():
 def traer_turnos_disponibles (fecha: str):
 
     fecha_date = datetime.strptime (fecha, "%Y-%m-%d").date() #paso a date
+
+    #la fecha no podria ser anterior al dia en que se toma el turno
+    fecha_actual = datetime.now()
+    if fecha_date < fecha_actual.date():
+        raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
+    
     #guardo los turnos cargados en la bd
     ocupados = session.query(TurnoDB).filter( 
         TurnoDB.fecha == fecha_date, TurnoDB.estado != "Cancelado"
@@ -141,7 +147,7 @@ def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
     if not turno:
         raise HTTPException(status_code=404, detail="Turno no encontrado")
 
-    func.lower(turno.estado) = turno_update.estado.value 
+    turno.estado = turno_update.estado.value 
     try:
         session.commit()
         session.refresh(turno)

@@ -393,6 +393,176 @@
 					"response": []
 				},
 				{
+					"name": "PostTurnoPersonaConCancelados",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"14:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoPersonaNoCargada",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 6\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoYaTomado",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoHoraFueraDelHorarioPermitido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoConFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GetTurnoById",
 					"request": {
 						"auth": {
@@ -443,6 +613,68 @@
 								{
 									"key": "fecha",
 									"value": "2025-09-28"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-01",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesAlgunos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-21",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-21"
 								}
 							]
 						}
