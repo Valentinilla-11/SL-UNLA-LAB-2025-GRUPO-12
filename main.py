@@ -36,12 +36,7 @@ def crear_persona(persona: Persona):
         raise HTTPException(status_code=400, detail="Error al crear persona (email duplicado o datos inválidos)") 
     return vars(persona_nueva) 
 
-
-@app.get("/turnos", response_model=list[TurnoOut])
-async def listar_turnos_tomados():
-    turnos = session.query(TurnoDB).all()
-    return turnos
-
+#Post turno
 @app.post("/turno", status_code=status.HTTP_201_CREATED)
 def crear_turno(turno: TurnoCreate):
 
@@ -102,7 +97,13 @@ def crear_turno(turno: TurnoCreate):
         raise HTTPException (status_code=400, detail="Error al crear un turno")
     return vars(turno_nuevo)
 
+#Get todos los turnos
+@app.get("/turnos", response_model=list[TurnoOut])
+async def listar_turnos_tomados():
+    turnos = session.query(TurnoDB).all()
+    return turnos
 
+#Get turnos por id
 @app.get("/turno/{id}", response_model=TurnoOut)
 def traer_turno_id(id:int):
     turno = session.get(TurnoDB, id)
@@ -110,15 +111,14 @@ def traer_turno_id(id:int):
         raise HTTPException(status_code=404, detail="Turno no encontrado")
     return turno
 
-
-#leo los horarios del json
+#Leo los horarios del json
 def leer_horarios ():
     with open ("horarios.json", "r", encoding= "utf-8") as archivo:
         horarios = json.load (archivo)
         horarios_posibles = horarios ["horarios"]
         return horarios_posibles
 
-
+#Get turnos disponibles 
 @app.get("/turnos-disponibles")
 def traer_turnos_disponibles (fecha: str):
 
@@ -134,14 +134,14 @@ def traer_turnos_disponibles (fecha: str):
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
 
-
+#Patch Turno
 @app.patch("/turno/{id}", response_model=TurnoOut)
 def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
     turno = session.get(TurnoDB, id)
     if not turno:
         raise HTTPException(status_code=404, detail="Turno no encontrado")
 
-    turno.estado = turno_update.estado.value 
+    func.lower(turno.estado) = turno_update.estado.value 
     try:
         session.commit()
         session.refresh(turno)
