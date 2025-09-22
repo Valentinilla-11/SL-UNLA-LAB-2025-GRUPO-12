@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from database import TurnoDB, session
-from models import Persona, TurnoCreate, TurnoEstadoUpdate, TurnoOut
+from models import Persona, PersonaOut, TurnoConPersonaOut, TurnoCreate, TurnoEstadoUpdate, TurnoOut
 from database import PersonaDB
 import json
 from sqlalchemy import func
@@ -37,7 +37,7 @@ def crear_persona(persona: Persona):
     return vars(persona_nueva) 
 
 #Post turno
-@app.post("/turno", status_code=status.HTTP_201_CREATED)
+@app.post("/turno", response_model=TurnoConPersonaOut, status_code=status.HTTP_201_CREATED)
 def crear_turno(turno: TurnoCreate):
 
     #calcular los 6 meses sin cancelar turnos de una persona
@@ -95,7 +95,21 @@ def crear_turno(turno: TurnoCreate):
     except:
         session.rollback()
         raise HTTPException (status_code=400, detail="Error al crear un turno")
-    return vars(turno_nuevo)
+    
+    #devuelvo con algunos de los datos de la persona
+    return TurnoConPersonaOut(
+        id=turno_nuevo.id,
+        fecha=turno_nuevo.fecha,
+        hora=turno_nuevo.hora,
+        estado=turno_nuevo.estado,
+        persona=PersonaOut(
+            id=persona.id,
+            nombre=persona.nombre,
+            dni=persona.dni,
+            fechaNacimiento=persona.fechaNacimiento,
+            edad=persona.edad
+        )
+)
 
 #Get todos los turnos
 @app.get("/turnos", response_model=list[TurnoOut])

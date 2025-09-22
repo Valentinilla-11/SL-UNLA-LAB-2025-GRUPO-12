@@ -26,14 +26,26 @@ class TurnoCreate(BaseModel):
     estado: EstadoEnum=EstadoEnum.PENDIENTE
     id_persona: int  # Solo se envía el ID, no el objeto completo
 
+class PersonaOut(BaseModel):
+    id: int
+    nombre: str
+    dni: int
+    fechaNacimiento: date
+    edad: int
+
+class TurnoConPersonaOut(BaseModel):
+    id: int
+    fecha: date
+    hora: time
+    estado: str
+    persona: PersonaOut
+
 class TurnoOut(BaseModel):
     id: int
     fecha: date
     hora: time
     estado: str
     id_persona: int
-    class Config:
-        orm_mode = True
 
 class TurnoUpdate(BaseModel):
     fecha: Optional[date]
