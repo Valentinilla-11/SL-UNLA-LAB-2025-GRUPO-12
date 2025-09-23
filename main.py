@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
-from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
+from models import PersonaCreate, PersonaOut, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido
 from sqlalchemy.exc import IntegrityError
@@ -16,24 +16,23 @@ async def root():
 
 @app.post("/personas", response_model=PersonaOut ,status_code=status.HTTP_201_CREATED) 
 def crear_persona(persona: PersonaCreate):
+    try:
+        dniValido = session.query(PersonaDB).filter(PersonaDB.dni == persona.dni).first()
+        if dniValido:
+            raise HTTPException(status_code=409, detail="El número de DNI ya está registrado.")
 
-    dniValido = session.query(PersonaDB).filter(PersonaDB.dni == persona.dni).first()
-    if dniValido:
-        raise HTTPException(status_code=409, detail="El número de DNI ya está registrado.")
+        emailValido = session.query(PersonaDB).filter(PersonaDB.email == persona.email).first()
+        if emailValido:
+            raise HTTPException(status_code=409, detail="El email ya está registrado.")
 
-    emailValido = session.query(PersonaDB).filter(PersonaDB.email == persona.email).first()
-    if emailValido:
-        raise HTTPException(status_code=409, detail="El email ya está registrado.")
-
-    persona_nueva = PersonaDB( 
-        nombre=persona.nombre.strip(), 
-        email=persona.email.lower().strip(),
-        dni=persona.dni,
-        telefono=persona.telefono,
-        fechaNacimiento=persona.fechaNacimiento,
-    ) 
-    session.add(persona_nueva)
-    try: # Intenta guardar la persona en la db
+        persona_nueva = PersonaDB( 
+            nombre=persona.nombre.strip(), 
+            email=persona.email.lower().strip(),
+            dni=persona.dni,
+            telefono=persona.telefono,
+            fechaNacimiento=persona.fechaNacimiento,
+        ) 
+        session.add(persona_nueva)
         session.commit()
         session.refresh(persona_nueva)
     except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
@@ -44,9 +43,9 @@ def crear_persona(persona: PersonaCreate):
         if "email" in msg:
             raise HTTPException(status_code=409, detail="El email ya está registrado.")
         raise HTTPException(status_code=400, detail="No se pudo crear la persona (error de integridad).")
-    except Exception : # Otro error
+    except Exception as e: # Otro error
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al crear la persona.")
+        raise HTTPException(status_code=400, detail=str(e))
     return to_persona_out(persona_nueva)
 
 @app.get("/personas/{id}", response_model=PersonaOut, status_code=status.HTTP_200_OK)
@@ -66,33 +65,69 @@ def listar_personas():
 
 @app.delete("/personas/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_persona(id: int):
-    persona = session.query(PersonaDB).filter(PersonaDB.id == id).first()
-    if not persona:
-        raise HTTPException(status_code=404, detail="Persona no encontrada.")
-    session.delete(persona)
     try:
+        persona = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+        if not persona:
+            raise HTTPException(status_code=404, detail="Persona no encontrada.")
+        session.delete(persona)
         session.commit()
-    except Exception:
+    except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al eliminar la persona.")
+        raise HTTPException(status_code=400, detail= str(e))
     return
 
 @app.put("/personas/{id}", response_model=PersonaOut)
 def modificar_persona(id:int, persona:PersonaCreate):
-    personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
-    if personaCambio is None:
-        raise HTTPException(status_code=404, detail="Persona no encontrada.")
-    personaCambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
-    personaCambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
-    personaCambio.dni = persona.dni #if personaCambio.dni is not None else None
-    personaCambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
-    personaCambio.fechaNacimiento = persona.fechaNacimiento #if personaCambio.fechaNacimiento is not None else None
     try:
+        personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+        if personaCambio is None:
+            raise HTTPException(status_code=404, detail="Persona no encontrada.")
+        personaCambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
+        personaCambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
+        personaCambio.dni = persona.dni #if personaCambio.dni is not None else None
+        personaCambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
+        personaCambio.fechaNacimiento = persona.fechaNacimiento #if personaCambio.fechaNacimiento is not None else None
+    
         session.commit()
         session.refresh(personaCambio)
-    except Exception:
+    except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al modificar la persona.")
+        msg = str(e.orig).lower()
+        if "dni" in msg:
+            raise HTTPException(status_code=409, detail="El DNI ya está registrado.")
+        if "email" in msg:
+            raise HTTPException(status_code=409, detail="El email ya está registrado.")
+        raise HTTPException(status_code=400, detail="No se pudo crear la persona (error de integridad).")
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=400, detail= str(e))
+
+    return to_persona_out(personaCambio)
+
+@app.patch("/personas/{id}", response_model=PersonaOut)
+def patchPersona(id: int, persona: PersonaUpdate):
+    try:
+        personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+        if personaCambio is None:
+            raise HTTPException(status_code=404, detail="Persona no encontrada.")
+        
+        updates = persona.model_dump(exclude_unset=True)
+        for campo, valor in updates.items():
+            setattr(personaCambio, campo, valor)
+
+        session.commit()
+        session.refresh(personaCambio)
+    except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
+        session.rollback()
+        msg = str(e.orig).lower()
+        if "dni" in msg:
+            raise HTTPException(status_code=409, detail="El DNI ya está registrado.")
+        if "email" in msg:
+            raise HTTPException(status_code=409, detail="El email ya está registrado.")
+        raise HTTPException(status_code=400, detail="No se pudo crear la persona (error de integridad).")
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=400, detail= str(e))
 
     return to_persona_out(personaCambio)
 

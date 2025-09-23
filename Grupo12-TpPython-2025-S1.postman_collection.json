@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "74cc88ce-894c-4e78-b8ed-f108ce77f1a3",
-		"name": "Grupo12-TpPython-2025",
+		"_postman_id": "34abca90-77d4-4e42-baba-02e67f3423da",
+		"name": "Grupo12-TpPython-2025-S1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "48622647",
-		"_collection_link": "https://morenarioscarnevale5-6031694.postman.co/workspace/Morena-Rios-Carnevale's-Workspa~3602c8f9-d514-44c5-8cd2-286ab0adc738/collection/48622647-74cc88ce-894c-4e78-b8ed-f108ce77f1a3?action=share&source=collection_link&creator=48622647"
+		"_exporter_id": "16622049"
 	},
 	"item": [
 		{
@@ -251,14 +250,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8000/personas/3",
+							"raw": "localhost:8000/personas/45",
 							"host": [
 								"localhost"
 							],
 							"port": "8000",
 							"path": [
 								"personas",
-								"3"
+								"45"
 							]
 						}
 					},
@@ -283,13 +282,242 @@
 					"response": []
 				},
 				{
-					"name": "deletePersona",
+					"name": "putPersonaOk",
 					"request": {
-						"method": "DELETE",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": ""
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaDniDuplicado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaMailDuplicado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454546,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaDniInvalido",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 454,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaMailInvalido",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor.com\",\r\n    \"dni\": 45454549,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaIdNoEncontrado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/89",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"89"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaOk",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email2@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaDniDuplicado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"dni\": 45454545\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaMailDuplicado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "localhost:8000/personas/2",
@@ -300,6 +528,57 @@
 							"path": [
 								"personas",
 								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaNoEncontrada",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/99",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePersona",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8000/personas/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"4"
 							]
 						}
 					},
@@ -368,7 +647,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-28\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-30\",\r\n  \"hora\": \"11:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -597,7 +876,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-11-30",
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -612,7 +891,7 @@
 							"query": [
 								{
 									"key": "fecha",
-									"value": "2025-11-30"
+									"value": "2025-09-23"
 								}
 							]
 						}

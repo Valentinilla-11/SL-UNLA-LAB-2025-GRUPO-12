@@ -56,11 +56,11 @@ class PersonaOut(BaseModel):
 
 # Clase para un patch
 class PersonaUpdate(BaseModel):
-    nombre: Optional[NombreStr] 
-    email: Optional[EmailStr] 
-    dni: Optional[int] 
-    telefono: Optional[int] 
-    fechaNacimiento: Optional[date]
+    nombre: Optional[NombreStr] = None
+    email: Optional[EmailStr] = None
+    dni: Optional[int] = None
+    telefono: Optional[int] = None
+    fechaNacimiento: Optional[date] = None
 
 # ---------- TURNOS -------------
 
@@ -70,12 +70,6 @@ class TurnoCreate(BaseModel):
     estado: EstadoEnum=EstadoEnum.PENDIENTE
     id_persona: int  # Solo se envía el ID, no el objeto completo
 
-class PersonaOut(BaseModel):
-    id: int
-    nombre: str
-    dni: int
-    fechaNacimiento: date
-    edad: int
 
 class TurnoConPersonaOut(BaseModel):
     id: int
