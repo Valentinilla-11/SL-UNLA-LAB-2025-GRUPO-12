@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
-from enum import EstadoEnum
 from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import leer_horarios, to_persona_out, to_time, to_turno_out, calcular_edad
@@ -8,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import time
 import json
 from sqlalchemy import func
-
+from estadoEnum import EstadoEnum
 app = FastAPI()
 
 @app.get("/")
