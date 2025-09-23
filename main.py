@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
+from enum import EstadoEnum
 from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
-from utils import to_persona_out, to_turno_out, calcular_edad
+from utils import leer_horarios, to_persona_out, to_time, to_turno_out, calcular_edad
 from sqlalchemy.exc import IntegrityError
 from datetime import time
 import json
@@ -113,7 +114,7 @@ def crear_turno(turno: TurnoCreate):
 
     cancelados_persona = session.query(TurnoDB).filter(
         TurnoDB.id_persona == persona.id, 
-        func.lower(TurnoDB.estado) == "cancelado",  
+        TurnoDB.estado == EstadoEnum.CANCELADO,  
         TurnoDB.fecha >= limite_fecha
     ).count()
 
@@ -124,7 +125,7 @@ def crear_turno(turno: TurnoCreate):
     turno_tomado = session.query(TurnoDB).filter(
         TurnoDB.fecha == turno.fecha,
         TurnoDB.hora == turno.hora,
-        TurnoDB.estado != "Cancelado"
+        TurnoDB.estado != EstadoEnum.CANCELADO
     ).first ()
 
     if turno_tomado :
@@ -148,7 +149,7 @@ def crear_turno(turno: TurnoCreate):
     turno_nuevo = TurnoDB(
         fecha = turno.fecha,
         hora= turno.hora, 
-        estado = "Pendiente",
+        estado = EstadoEnum.PENDIENTE,
         id_persona = turno.id_persona
     )
     
@@ -220,13 +221,6 @@ def traer_turno_id(id:int):
         raise HTTPException(status_code=404, detail="Turno no encontrado")
     return turno
 
-#Leo los horarios del json
-def leer_horarios ():
-    with open ("horarios.json", "r", encoding= "utf-8") as archivo:
-        horarios = json.load (archivo)
-        horarios_posibles = horarios ["horarios"]
-        return horarios_posibles
-
 #Get turnos disponibles 
 @app.get("/turnos-disponibles")
 def traer_turnos_disponibles (fecha: str):
@@ -237,39 +231,51 @@ def traer_turnos_disponibles (fecha: str):
     fecha_actual = datetime.now()
     if fecha_date < fecha_actual.date():
         raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
-    
-    def to_time(val):
-        if isinstance(val, time):
-            return val
-            # val es string "HH:MM" o "HH:MM:SS"
-        fmt = "%H:%M:%S" if len(val) == 8 else "%H:%M"
-        return datetime.strptime(val, fmt).time()
 
     ocupados = session.query(TurnoDB).filter(
         TurnoDB.fecha == fecha_date,
-        TurnoDB.estado != "Cancelado"
+        TurnoDB.estado != EstadoEnum.CANCELADO
     ).all()
 
     #guardo los turnos cargados en la bd
     ocupados = session.query(TurnoDB).filter( 
-        TurnoDB.fecha == fecha_date, TurnoDB.estado != "CANCELADO"
+        TurnoDB.fecha == fecha_date, TurnoDB.estado != EstadoEnum.CANCELADO
     ).all()
 
-    tomados_horas = [to_time(ocupado.hora) for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
+    tomados_horas = [ocupado.hora for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
     horarios_disponibles = [to_time(h) for h in leer_horarios ()]
     turnos_disponibles = [horario.strftime("%H:%M") for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
 
-#Patch Turno
-@app.patch("/turno/{id}", response_model=TurnoOut)
+#Patch Turno CANCELAR
+@app.patch("/turno/{id}/cancelar", response_model=TurnoOut)
 def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
-    turno = session.get(TurnoDB, id)
-    if not turno:
-        raise HTTPException(status_code=404, detail="Turno no encontrado")
-
-    turno.estado = turno_update.estado.value 
     try:
+        turno = session.get(TurnoDB, id)
+        if not turno:
+            raise HTTPException(status_code=404, detail="Turno no encontrado")
+
+        turno.estado = EstadoEnum.CANCELADO
+        
+        session.commit()
+        session.refresh(turno)
+    except:
+        session.rollback()
+        raise HTTPException(status_code=400, detail="Error al actualizar el estado del turno")
+
+    return turno
+
+#Patch Turno CONFIRMAR
+@app.patch("/turno/{id}/confirmar", response_model=TurnoOut)
+def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
+    try:
+        turno = session.get(TurnoDB, id)
+        if not turno:
+            raise HTTPException(status_code=404, detail="Turno no encontrado")
+
+        turno.estado = EstadoEnum.CONFIRMADO
+        
         session.commit()
         session.refresh(turno)
     except:

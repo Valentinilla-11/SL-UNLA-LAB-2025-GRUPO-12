@@ -3,6 +3,8 @@ from datetime import date, time
 from typing import Annotated, Optional
 import enum
 
+from enum import EstadoEnum
+
 # ---------- PERSONAS -------------
 
 # Creamos NombreStr que acepta tildes y no permite caracteres especiales o numeros
@@ -65,12 +67,6 @@ class PersonaUpdate(BaseModel):
     fechaNacimiento: Optional[date]
 
 # ---------- TURNOS -------------
-
-class EstadoEnum(str, enum.Enum):
-    PENDIENTE = "PENDIENTE"
-    CONFIRMADO = "CONFIRMADO"
-    CANCELADO = "CANCELADO"
-    ASISTIDO = "ASISTIDO"
 
 class TurnoCreate(BaseModel):
     fecha: date

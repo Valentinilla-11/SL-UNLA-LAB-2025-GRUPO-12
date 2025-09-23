@@ -1,4 +1,6 @@
 from datetime import date
+import datetime
+import json
 from models import PersonaOut, TurnoOut
 from database import PersonaDB, TurnoDB 
 
@@ -33,3 +35,14 @@ def to_turno_out(t: TurnoDB) -> TurnoOut:
 
     )
 
+#Leo los horarios del json
+def leer_horarios ():
+    with open ("horarios.json", "r", encoding= "utf-8") as archivo:
+        horarios = json.load (archivo)
+        horarios_posibles = horarios ["horarios"]
+        return horarios_posibles
+    
+
+def to_time (hora: str):
+        hora_time = datetime.strptime(hora, "%H:%M").time()
+        return hora_time
