@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey, Time, Enum
-from sqlalchemy.orm import declarative_base, sessionmaker 
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 engine = create_engine('sqlite:///tp_python.db') 
 
@@ -15,7 +15,6 @@ class PersonaDB(Base):
     telefono = Column(Integer, nullable=False)
     fechaNacimiento = Column(Date, nullable=False)
     habilitado = Column(Boolean, nullable=False, default=True)
-    #turnos = relationship("TurnoDB", back_populates="persona")
 
 class TurnoDB(Base):
     __tablename__ = "turnos"
@@ -25,6 +24,7 @@ class TurnoDB(Base):
     hora = Column(Time, nullable = False)
     estado = Column(String, default="PENDIENTE")
     id_persona = Column(Integer, ForeignKey("personas.id"))
+    persona = relationship("PersonaDB") #para poder ver la persona que solicito el turno
     
 Base.metadata.create_all(engine) 
 

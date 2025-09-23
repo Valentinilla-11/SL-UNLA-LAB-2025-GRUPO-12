@@ -40,9 +40,6 @@ class PersonaCreate(BaseModel):
         return fechaIngresada
 
 
-
-
-
 # Clase que se mostrará en el response
 class PersonaOut(BaseModel):
     id: int

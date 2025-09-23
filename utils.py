@@ -1,8 +1,9 @@
-from datetime import date
-import datetime
+from datetime import date, timedelta, datetime
+from http.client import HTTPException
 import json
+from estadoEnum import EstadoEnum
 from models import PersonaOut, TurnoOut
-from database import PersonaDB, TurnoDB 
+from database import PersonaDB, Session, TurnoDB 
 
 def calcular_edad(fechaNacimiento: date) -> int:
     hoy = date.today()
@@ -35,6 +36,21 @@ def to_turno_out(t: TurnoDB) -> TurnoOut:
 
     )
 
+# verifico si la persona esta habilitada
+def persona_habilitada(persona: PersonaDB, session: Session):
+    limite_fecha = datetime.now() - timedelta(days=180)
+
+    cancelados_persona = session.query(TurnoDB).filter(
+        TurnoDB.id_persona == persona.id,
+        TurnoDB.estado == EstadoEnum.CANCELADO,
+        TurnoDB.fecha >= limite_fecha
+    ).count()
+
+    persona.habilitado = cancelados_persona < 5
+    session.commit()
+    session.refresh(persona)
+    return persona.habilitado
+
 #Leo los horarios del json
 def leer_horarios ():
     with open ("horarios.json", "r", encoding= "utf-8") as archivo:
@@ -42,7 +58,19 @@ def leer_horarios ():
         horarios_posibles = horarios ["horarios"]
         return horarios_posibles
     
-
+#convierto de string a time
 def to_time (hora: str):
-        hora_time = datetime.strptime(hora, "%H:%M").time()
-        return hora_time
+    hora_time = datetime.strptime(hora, "%H:%M").time()
+    return hora_time
+
+#valido que el estado no sea CANCELADO o ASISTIDO
+def validar_estado (turno: TurnoDB):
+    if turno.estado in [EstadoEnum.CANCELADO, EstadoEnum.ASISTIDO]:
+        raise Exception("No se puede modificar un turno que ya fue CANCELADO o ASISTIDO")
+    return True
+
+#valido que el estado no sea ASISTIDO (para eliminar)
+def validar_estado_solo_asistido (turno: TurnoDB):
+   if turno.estado == EstadoEnum.ASISTIDO:
+        raise  Exception ("No se puede eliminar un turno que ya fue ASISTIDO")
+   return True

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from models import PersonaCreate, PersonaOut, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
-from utils import leer_horarios, to_persona_out, to_time, to_turno_out, calcular_edad
+from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido
 from sqlalchemy.exc import IntegrityError
 from datetime import time
 import json
@@ -13,7 +13,6 @@ app = FastAPI()
 @app.get("/")
 async def root():
     return {"msg": "API funcionando"}
-
 
 @app.post("/personas", response_model=PersonaOut ,status_code=status.HTTP_201_CREATED) 
 def crear_persona(persona: PersonaCreate):
@@ -50,14 +49,12 @@ def crear_persona(persona: PersonaCreate):
         raise HTTPException(status_code=400, detail="Error al crear la persona.")
     return to_persona_out(persona_nueva)
 
-
 @app.get("/personas/{id}", response_model=PersonaOut, status_code=status.HTTP_200_OK)
 def listar_persona_por_id(id: int):
     persona = session.query(PersonaDB).filter(PersonaDB.id == id).first()
     if not persona:
         raise HTTPException(status_code=404, detail="Persona no encontrada.")
     return to_persona_out(persona)
-
 
 @app.get("/personas") 
 def listar_personas(): 
@@ -99,68 +96,54 @@ def modificar_persona(id:int, persona:PersonaCreate):
 
     return to_persona_out(personaCambio)
 
-
+################################## Turnos ###################################
 #Post turno
 @app.post("/turno", response_model=TurnoConPersonaOut, status_code=status.HTTP_201_CREATED)
 def crear_turno(turno: TurnoCreate):
-
-    #calcular los 6 meses sin cancelar turnos de una persona
-    persona = session.query (PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
-    if not persona:
-        raise HTTPException(status_code = 400, detail = "La persona a la que se le quiere asignar un turno, no esta cargada en la base de datos")
-    
-    limite_fecha = datetime.now() - timedelta(days=180)
-
-    cancelados_persona = session.query(TurnoDB).filter(
-        TurnoDB.id_persona == persona.id, 
-        TurnoDB.estado == EstadoEnum.CANCELADO,  
-        TurnoDB.fecha >= limite_fecha
-    ).count()
-
-    if cancelados_persona >= 5:
-        raise HTTPException (status_code = 400, detail = "La persona tiene 5 o mas turnos cancelados en los ultimos 6 meses por lo que no puese solicitar un nuevo turno por el momneto")
-    
-    #verifico si el turno ya fue tomado
-    turno_tomado = session.query(TurnoDB).filter(
-        TurnoDB.fecha == turno.fecha,
-        TurnoDB.hora == turno.hora,
-        TurnoDB.estado != EstadoEnum.CANCELADO
-    ).first ()
-
-    if turno_tomado :
-        raise HTTPException (status_code = 400, detail ="El turno ya esta tomado en esa fecha y hora")
-    
-    #creo un nuevo turno 
-
-    #verifico la hora
-    lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
-    
-    if turno.hora not in lista_horarios :
-        raise HTTPException (status_code = 400, detail = "El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora, desde las 09:00 hasta las 17:00")
-    
-    #la fecha no podria ser anterior al dia en que se toma el turno
-    fecha_actual = datetime.now()
-    if turno.fecha < fecha_actual.date():
-        raise HTTPException (status_code = 400, detail = "La fecha no puede ser anterior a la fecha actual")
-    
-
-    #si pasa los errores, se crea el turno en la base
-    turno_nuevo = TurnoDB(
-        fecha = turno.fecha,
-        hora= turno.hora, 
-        estado = EstadoEnum.PENDIENTE,
-        id_persona = turno.id_persona
-    )
-    
-    session.add(turno_nuevo)
     try:
+        #persona esta cargada en la base 
+        persona = session.query (PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
+        if not persona:
+            raise Exception("La persona a la que se le quiere asignar un turno, no esta cargada en la base de datos")
+        
+        #verifico si la persona esta habilitada
+        if not persona_habilitada (persona, session):
+            raise Exception ("La persona no esta habilitada para sacar turnos, ya que tiene 5 o mas turnos cancelados en los ultimos 6 meses")
+        
+        #verifico si el turno ya fue tomado
+        turno_tomado = session.query(TurnoDB).filter(
+            TurnoDB.fecha == turno.fecha,
+            TurnoDB.hora == turno.hora,
+            TurnoDB.estado != EstadoEnum.CANCELADO
+        ).first ()
+
+        if turno_tomado :
+            raise Exception ("El turno ya esta tomado en esa fecha y hora")
+        
+
+        #verifico la hora
+        lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
+        if turno.hora not in lista_horarios :
+            raise Exception ("El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora, desde las 09:00 hasta las 17:00")
+        
+        #la fecha no podria ser anterior al dia en que se toma el turno
+        fecha_actual = datetime.now()
+        if turno.fecha < fecha_actual.date():
+            raise Exception ( "La fecha no puede ser anterior a la fecha actual")
+        
+        #si no tiene errores, se crea el turno en la base
+        turno_nuevo = TurnoDB(
+            fecha = turno.fecha,
+            hora= turno.hora, 
+            estado = EstadoEnum.PENDIENTE,
+            id_persona = turno.id_persona
+        )
+        
+        session.add(turno_nuevo)
         session.commit()
         session.refresh(turno_nuevo)
-    except:
-        session.rollback()
-        raise HTTPException (status_code=400, detail="Error al crear un turno")
-    #devuelvo con algunos de los datos de la persona
-    return TurnoConPersonaOut(
+
+        return TurnoConPersonaOut(
         id=turno_nuevo.id,
         fecha=turno_nuevo.fecha,
         hora=turno_nuevo.hora,
@@ -172,8 +155,13 @@ def crear_turno(turno: TurnoCreate):
             fechaNacimiento=persona.fechaNacimiento,
             edad=calcular_edad(persona.fechaNacimiento)
         )
-)
+    )    
+    except Exception as e:
+        session.rollback()
+        raise HTTPException (status_code=400, detail= str(e))
+    #devuelvo con algunos de los datos de la persona
 
+#Put turno
 @app.put("/turnos/{id}", response_model=TurnoOut)
 def modificar_Turno(id:int, turno:TurnoCreate):
     turnoCambio = session.query(TurnoDB).filter(TurnoDB.id == id).first()
@@ -192,39 +180,78 @@ def modificar_Turno(id:int, turno:TurnoCreate):
 
     return to_turno_out(turnoCambio)
 
+#Delete turno (fisico)
 @app.delete("/turnos/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_turno(id: int):
-    turno = session.query(TurnoDB).filter(TurnoDB.id == id).first()
-    if not turno:
-        raise HTTPException(status_code=404, detail="Turno no encontrado.")
-    session.delete(turno)
     try:
+        turno = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+        if not turno:
+            raise Exception("Turno no encontrado.")
+        
+        validar_estado_solo_asistido(turno)
+        
+        session.delete(turno)
         session.commit()
-    except Exception:
+    except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al eliminar el turno.")
+        raise HTTPException(status_code=400, detail= str(e))
     return
 
-
-#Get todos los turnos
-@app.get("/turnos", response_model=list[TurnoOut])
+#Get todos los turnos con algun dato de la persona
+@app.get("/turnos", response_model=list[TurnoConPersonaOut])
 async def listar_turnos_tomados():
-    turnos = session.query(TurnoDB).all()
+    turnos_bd = session.query(TurnoDB, PersonaDB).join(PersonaDB).all()
+    
+    if not turnos_bd:
+        raise HTTPException(status_code=404, detail="No hay turnos cargados.")
+    
+    turnos= []
+    for turno, persona in turnos_bd:
+        turnos.append(TurnoConPersonaOut(
+            id=turno.id,
+            fecha=turno.fecha,
+            hora=turno.hora,
+            estado=turno.estado,
+            persona=PersonaOut(
+                id=persona.id,
+                nombre=persona.nombre,
+                dni=persona.dni,
+                fechaNacimiento=persona.fechaNacimiento,
+                edad=calcular_edad(persona.fechaNacimiento)
+            )
+        ))
     return turnos
 
 #Get turnos por id
-@app.get("/turno/{id}", response_model=TurnoOut)
-def traer_turno_id(id:int):
-    turno = session.get(TurnoDB, id)
+@app.get("/turno/{id}", response_model=TurnoConPersonaOut)
+def traer_turno_id(id: int):
+    turno = session.query(TurnoDB).filter(TurnoDB.id == id).first()
     if not turno:
         raise HTTPException(status_code=404, detail="Turno no encontrado")
-    return turno
+    
+#muestro el turno con algunos datos de la persona
+    return TurnoConPersonaOut(
+        id=turno.id,
+        fecha=turno.fecha,
+        hora=turno.hora,
+        estado=turno.estado,
+        persona=PersonaOut(
+            id=turno.persona.id,
+            nombre=turno.persona.nombre,
+            dni=turno.persona.dni,
+            fechaNacimiento=turno.persona.fechaNacimiento,
+            edad=calcular_edad(turno.persona.fechaNacimiento)
+        )
+    )
 
 #Get turnos disponibles 
 @app.get("/turnos-disponibles")
 def traer_turnos_disponibles (fecha: str):
 
-    fecha_date = datetime.strptime (fecha, "%Y-%m-%d").date() #paso a date
+    try:
+        fecha_date = datetime.strptime (fecha, "%Y-%m-%d").date() #paso a date
+    except ValueError:
+        raise HTTPException (status_code = 400, detail = "El formato de la fecha debe ser YYYY-MM-DD")
 
     #la fecha no podria ser anterior al dia en que se toma el turno
     fecha_actual = datetime.now()
@@ -247,21 +274,23 @@ def traer_turnos_disponibles (fecha: str):
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
 
-#Patch Turno CANCELAR
+# PATCH Turno CANCELAR
 @app.patch("/turno/{id}/cancelar", response_model=TurnoOut)
-def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
+def actualizar_estado_turno(id: int):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:
-            raise HTTPException(status_code=404, detail="Turno no encontrado")
-
+            raise Exception("Turno no encontrado")
+    
+    #valido si el estado no es CANCELADO o ASISTIDO
+        validar_estado(turno) 
         turno.estado = EstadoEnum.CANCELADO
         
         session.commit()
         session.refresh(turno)
-    except:
+    except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al actualizar el estado del turno")
+        raise HTTPException(status_code=400, detail=str(e))
 
     return turno
 
@@ -271,14 +300,34 @@ def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:
-            raise HTTPException(status_code=404, detail="Turno no encontrado")
+            raise Exception("Turno no encontrado")
+    
+    #valido si el estado no es CANCELADO o ASISTIDO
+        validar_estado(turno)
 
         turno.estado = EstadoEnum.CONFIRMADO
         
         session.commit()
         session.refresh(turno)
-    except:
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=400, detail= str(e))
+
+    return turno
+
+#Patch Turno ASISTIDO solo para probar validaciones 
+@app.patch("/turno/{id}/asistido", response_model=TurnoOut)
+def actualizar_estado_turno(id: int):
+    try:
+        turno = session.get(TurnoDB, id)
+        if not turno:
+            raise HTTPException(status_code=404, detail="Turno no encontrado")
+        
+        turno.estado = EstadoEnum.ASISTIDO
+
+        session.commit()
+        session.refresh(turno)  
+    except Exception:
         session.rollback()
         raise HTTPException(status_code=400, detail="Error al actualizar el estado del turno")
-
     return turno
