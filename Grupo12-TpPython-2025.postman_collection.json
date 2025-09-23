@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "f41a34a3-c904-429c-bc91-4ecd7d3556b0",
+		"_postman_id": "74cc88ce-894c-4e78-b8ed-f108ce77f1a3",
 		"name": "Grupo12-TpPython-2025",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "16622049"
+		"_exporter_id": "48622647",
+		"_collection_link": "https://morenarioscarnevale5-6031694.postman.co/workspace/Morena-Rios-Carnevale's-Workspa~3602c8f9-d514-44c5-8cd2-286ab0adc738/collection/48622647-74cc88ce-894c-4e78-b8ed-f108ce77f1a3?action=share&source=collection_link&creator=48622647"
 	},
 	"item": [
 		{
@@ -367,7 +368,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"15:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-28\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -469,7 +470,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -503,7 +504,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -537,7 +538,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 1\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -562,7 +563,7 @@
 					"response": []
 				},
 				{
-					"name": "GetTurnoById",
+					"name": "GetTurnoByIdOk",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -596,7 +597,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-11-30",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -611,7 +612,7 @@
 							"query": [
 								{
 									"key": "fecha",
-									"value": "2025-09-23"
+									"value": "2025-11-30"
 								}
 							]
 						}
@@ -658,7 +659,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-21",
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -673,7 +674,7 @@
 							"query": [
 								{
 									"key": "fecha",
-									"value": "2025-09-21"
+									"value": "2025-09-23"
 								}
 							]
 						}
@@ -707,7 +708,7 @@
 					"response": []
 				},
 				{
-					"name": "PatchTurnoEstadoOk",
+					"name": "PatchTurnoCancelarOk",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -725,7 +726,7 @@
 							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/1?estado=Cancelado",
+							"raw": "http://127.0.0.1:8000/turno/8/cancelar",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -736,13 +737,198 @@
 							"port": "8000",
 							"path": [
 								"turno",
+								"8",
+								"cancelar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoCancelarError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/1/cancelar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
 								"1"
 							],
-							"query": [
-								{
-									"key": "estado",
-									"value": "Cancelado"
-								}
+							"port": "8000",
+							"path": [
+								"turno",
+								"1",
+								"cancelar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoConfirmarOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/5/confirmar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"5",
+								"confirmar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoConfirmarError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/1/confirmar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"1",
+								"confirmar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTurnoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTurnoError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos/5",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchAsistidoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/5/asistido",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"5",
+								"asistido"
 							]
 						}
 					},
@@ -756,11 +942,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8000",
-					"host": [
-						"localhost"
-					],
-					"port": "8000"
+					"raw": ""
 				}
 			},
 			"response": []
