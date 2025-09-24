@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
-from models import PersonaCreate, PersonaOut, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
+from models import PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido
 from sqlalchemy.exc import IntegrityError
@@ -183,7 +183,7 @@ def crear_turno(turno: TurnoCreate):
         fecha=turno_nuevo.fecha,
         hora=turno_nuevo.hora,
         estado=turno_nuevo.estado,
-        persona=PersonaOut(
+        persona=PersonaOutTurno(
             id=persona.id,
             nombre=persona.nombre,
             dni=persona.dni,
@@ -247,7 +247,7 @@ async def listar_turnos_tomados():
             fecha=turno.fecha,
             hora=turno.hora,
             estado=turno.estado,
-            persona=PersonaOut(
+            persona=PersonaOutTurno(
                 id=persona.id,
                 nombre=persona.nombre,
                 dni=persona.dni,
@@ -270,7 +270,7 @@ def traer_turno_id(id: int):
         fecha=turno.fecha,
         hora=turno.hora,
         estado=turno.estado,
-        persona=PersonaOut(
+        persona=PersonaOutTurno(
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
@@ -309,9 +309,9 @@ def traer_turnos_disponibles (fecha: str):
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
 
-# PATCH Turno CANCELAR
-@app.patch("/turno/{id}/cancelar", response_model=TurnoOut)
-def actualizar_estado_turno(id: int):
+#Put Turno CANCELAR
+@app.put("/turno/{id}/cancelar", response_model= TurnoConPersonaOut)
+def actualizar_estado_turno_cancelar(id: int):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:
@@ -327,11 +327,23 @@ def actualizar_estado_turno(id: int):
         session.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-    return turno
+    return TurnoConPersonaOut(
+        id=turno.id,
+        fecha=turno.fecha,
+        hora=turno.hora,
+        estado=turno.estado,
+        persona=PersonaOutTurno(
+            id=turno.persona.id,
+            nombre=turno.persona.nombre,
+            dni=turno.persona.dni,
+            fechaNacimiento=turno.persona.fechaNacimiento,
+            edad=calcular_edad(turno.persona.fechaNacimiento)
+        )
+    )
 
-#Patch Turno CONFIRMAR
-@app.patch("/turno/{id}/confirmar", response_model=TurnoOut)
-def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
+#Put Turno CONFIRMAR
+@app.put("/turno/{id}/confirmar", response_model= TurnoConPersonaOut)
+def actualizar_estado_turno_confirmar(id: int, turno_update: TurnoEstadoUpdate):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:
@@ -348,11 +360,23 @@ def actualizar_estado_turno(id: int, turno_update: TurnoEstadoUpdate):
         session.rollback()
         raise HTTPException(status_code=400, detail= str(e))
 
-    return turno
+    return TurnoConPersonaOut(
+        id=turno.id,
+        fecha=turno.fecha,
+        hora=turno.hora,
+        estado=turno.estado,
+        persona=PersonaOutTurno(
+            id=turno.persona.id,
+            nombre=turno.persona.nombre,
+            dni=turno.persona.dni,
+            fechaNacimiento=turno.persona.fechaNacimiento,
+            edad=calcular_edad(turno.persona.fechaNacimiento)
+        )
+    )
 
 #Patch Turno ASISTIDO solo para probar validaciones 
 @app.patch("/turno/{id}/asistido", response_model=TurnoOut)
-def actualizar_estado_turno(id: int):
+def actualizar_estado_turno_asistido(id: int):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:

@@ -18,7 +18,11 @@ B. ABM de turnos
 ● GET /turno/{id} (Morena Rios)
 ● PUT /turnos/{id} (Lucio Karabetian)
 ● DELETE /turnos/{id} (Lucio Karabetian)
-● PATCH /turno/{id} (Morena Rios)
 
 C. Cálculo de turnos disponibles
 ● GET /turnos-disponibles?fecha=YYYY-MM-DD (Morena Rios)
+
+D. Gestión de estado de turno
+● PUT /turno/{id}/cancelar (Morena Rios)
+● PUT /turno/{id}/confirmar (Morena Rios)
+● PATCH /turno/{id}/asistido (Morena Rios)

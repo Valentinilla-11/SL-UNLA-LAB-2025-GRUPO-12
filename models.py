@@ -54,6 +54,13 @@ class PersonaOut(BaseModel):
     class Config:
         orm_mode = True
 
+class PersonaOutTurno (BaseModel):
+    id: int
+    nombre: str
+    dni: int
+    fechaNacimiento: date
+    edad: int
+
 # Clase para un patch
 class PersonaUpdate(BaseModel):
     nombre: Optional[NombreStr] = None
@@ -76,7 +83,7 @@ class TurnoConPersonaOut(BaseModel):
     fecha: date
     hora: time
     estado: str
-    persona: PersonaOut
+    persona: PersonaOutTurno 
 
 class TurnoOut(BaseModel):
     id: int
