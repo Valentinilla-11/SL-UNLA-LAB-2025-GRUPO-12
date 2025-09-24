@@ -380,13 +380,14 @@ def actualizar_estado_turno_asistido(id: int):
     try:
         turno = session.get(TurnoDB, id)
         if not turno:
-            raise HTTPException(status_code=404, detail="Turno no encontrado")
+            raise Exception("Turno no encontrado")
         
+        validar_estado(turno)
         turno.estado = EstadoEnum.ASISTIDO
 
         session.commit()
         session.refresh(turno)  
-    except Exception:
+    except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=400, detail="Error al actualizar el estado del turno")
+        raise HTTPException(status_code=400, detail= str(e))
     return turno

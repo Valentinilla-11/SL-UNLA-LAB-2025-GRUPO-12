@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "34abca90-77d4-4e42-baba-02e67f3423da",
-		"name": "Grupo12-TpPython-2025-S1",
+		"_postman_id": "74cc88ce-894c-4e78-b8ed-f108ce77f1a3",
+		"name": "Grupo12-TpPython-2025",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "16622049"
+		"_exporter_id": "48622647",
+		"_collection_link": "https://morenarioscarnevale5-6031694.postman.co/workspace/Morena-Rios-Carnevale's-Workspa~3602c8f9-d514-44c5-8cd2-286ab0adc738/collection/48622647-74cc88ce-894c-4e78-b8ed-f108ce77f1a3?action=share&source=collection_link&creator=48622647"
 	},
 	"item": [
 		{
@@ -250,14 +251,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8000/personas/45",
+							"raw": "localhost:8000/personas/3",
 							"host": [
 								"localhost"
 							],
 							"port": "8000",
 							"path": [
 								"personas",
-								"45"
+								"3"
 							]
 						}
 					},
@@ -282,242 +283,13 @@
 					"response": []
 				},
 				{
-					"name": "putPersonaOk",
+					"name": "deletePersona",
 					"request": {
-						"method": "PUT",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/3",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "putPersonaDniDuplicado",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/3",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "putPersonaMailDuplicado",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454546,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/3",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "putPersonaDniInvalido",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 454,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/3",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "putPersonaMailInvalido",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor.com\",\r\n    \"dni\": 45454549,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/3",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "putPersonaIdNoEncontrado",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/89",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"89"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "patchPersonaOk",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"email2@gmail.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/1",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "patchPersonaDniDuplicado",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"dni\": 45454545\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/1",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "patchPersonaMailDuplicado",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": ""
 						},
 						"url": {
 							"raw": "localhost:8000/personas/2",
@@ -528,57 +300,6 @@
 							"path": [
 								"personas",
 								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "patchPersonaNoEncontrada",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8000/personas/99",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"99"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deletePersona",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "localhost:8000/personas/4",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"personas",
-								"4"
 							]
 						}
 					},
@@ -647,7 +368,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"fecha\": \"2025-09-30\",\r\n  \"hora\": \"11:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"raw": "{\r\n  \"fecha\": \"2025-09-29\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -876,7 +597,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-11-30",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -891,7 +612,7 @@
 							"query": [
 								{
 									"key": "fecha",
-									"value": "2025-09-23"
+									"value": "2025-11-30"
 								}
 							]
 						}
@@ -987,12 +708,12 @@
 					"response": []
 				},
 				{
-					"name": "PatchTurnoCancelarOk",
+					"name": "PutTurnoCancelarOk",
 					"request": {
 						"auth": {
 							"type": "noauth"
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -1002,10 +723,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+							"raw": "{}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/8/cancelar",
+							"raw": "http://127.0.0.1:8000/turno/12/cancelar",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1016,7 +737,7 @@
 							"port": "8000",
 							"path": [
 								"turno",
-								"8",
+								"12",
 								"cancelar"
 							]
 						}
@@ -1024,12 +745,12 @@
 					"response": []
 				},
 				{
-					"name": "PatchTurnoCancelarError",
+					"name": "PutTurnoCancelarError",
 					"request": {
 						"auth": {
 							"type": "noauth"
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -1042,7 +763,7 @@
 							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/1/cancelar",
+							"raw": "http://127.0.0.1:8000/turno/4/cancelar",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1053,7 +774,7 @@
 							"port": "8000",
 							"path": [
 								"turno",
-								"1",
+								"4",
 								"cancelar"
 							]
 						}
@@ -1061,12 +782,12 @@
 					"response": []
 				},
 				{
-					"name": "PatchTurnoConfirmarOk",
+					"name": "PutTurnoConfirmarOk",
 					"request": {
 						"auth": {
 							"type": "noauth"
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -1079,7 +800,7 @@
 							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/5/confirmar",
+							"raw": "http://127.0.0.1:8000/turno/9/confirmar",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1090,7 +811,7 @@
 							"port": "8000",
 							"path": [
 								"turno",
-								"5",
+								"9",
 								"confirmar"
 							]
 						}
@@ -1098,12 +819,12 @@
 					"response": []
 				},
 				{
-					"name": "PatchTurnoConfirmarError",
+					"name": "PutTurnoConfirmarError",
 					"request": {
 						"auth": {
 							"type": "noauth"
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -1116,7 +837,7 @@
 							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/turno/1/confirmar",
+							"raw": "http://127.0.0.1:8000/turno/2/confirmar",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1127,7 +848,7 @@
 							"port": "8000",
 							"path": [
 								"turno",
-								"1",
+								"2",
 								"confirmar"
 							]
 						}
@@ -1143,7 +864,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://127.0.0.1:8000/turnos/1",
+							"raw": "http://127.0.0.1:8000/turnos/2",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1154,7 +875,7 @@
 							"port": "8000",
 							"path": [
 								"turnos",
-								"1"
+								"2"
 							]
 						}
 					},

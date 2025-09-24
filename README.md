@@ -1,7 +1,10 @@
 # SL-UNLA-LAB-2025-GRUPO-12
 
 Link al video: 
-Enumeración de todos los endpoint realizados entre paréntesis responsable de la implementación: 
+
+Link al postman: https://morenarioscarnevale5-6031694.postman.co/workspace/Morena-Rios-Carnevale's-Workspa~3602c8f9-d514-44c5-8cd2-286ab0adc738/collection/48622647-74cc88ce-894c-4e78-b8ed-f108ce77f1a3?action=share&creator=48622647 
+
+Enumeración de todos los endpoint realizados:
 
 A. ABM de personas
 ● POST /personas (Francisco Robles)
