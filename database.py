@@ -13,7 +13,7 @@ class PersonaDB(Base):
     email = Column(String, nullable=False, unique=True)
     dni = Column(Integer, nullable=False, unique=True)
     telefono = Column(Integer, nullable=False)
-    fechaNacimiento = Column(Date, nullable=False)
+    fecha_nacimiento = Column(Date, nullable=False)
     habilitado = Column(Boolean, nullable=False, default=True)
 
 class TurnoDB(Base):

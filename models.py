@@ -31,7 +31,7 @@ class PersonaCreate(BaseModel):
             raise ValueError("DNI invalido")
         return dni_ingresado
     
-    @field_validator("fechaNacimiento")
+    @field_validator("fecha_nacimiento")
     @classmethod
     def fecha_nacimiento_valida(cls, fecha_ingresada: date) -> date:
         if fecha_ingresada >= date.today():
