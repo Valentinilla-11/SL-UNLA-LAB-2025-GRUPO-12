@@ -22,21 +22,21 @@ class PersonaCreate(BaseModel):
     email: EmailStr
     dni: int
     telefono: int
-    fechaNacimiento: date
+    fecha_nacimiento: date
 
     @field_validator("dni")
     @classmethod
-    def dni_valido(cls, dniIngresado: int) -> int:
-        if dniIngresado <=0 or len(str(dniIngresado)) < 7 or len(str(dniIngresado)) > 8:
+    def dni_valido(cls, dni_ingresado: int) -> int:
+        if dni_ingresado <=0 or len(str(dni_ingresado)) < 7 or len(str(dni_ingresado)) > 8:
             raise ValueError("DNI invalido")
-        return dniIngresado
+        return dni_ingresado
     
     @field_validator("fechaNacimiento")
     @classmethod
-    def fecha_nacimiento_valida(cls, fechaIngresada: date) -> date:
-        if fechaIngresada >= date.today():
+    def fecha_nacimiento_valida(cls, fecha_ingresada: date) -> date:
+        if fecha_ingresada >= date.today():
             raise ValueError("La fecha de nacimiento debe ser en el pasado.")
-        return fechaIngresada
+        return fecha_ingresada
 
 
 # Clase que se mostrará en el response
@@ -46,7 +46,7 @@ class PersonaOut(BaseModel):
     email: EmailStr
     dni: int
     telefono: int
-    fechaNacimiento: date
+    fecha_nacimiento: date
     edad: int
     habilitado: bool
 
@@ -57,7 +57,7 @@ class PersonaOutTurno (BaseModel):
     id: int
     nombre: str
     dni: int
-    fechaNacimiento: date
+    fecha_nacimiento: date
     edad: int
 
 # Clase para un patch
@@ -66,7 +66,7 @@ class PersonaUpdate(BaseModel):
     email: Optional[EmailStr] = None
     dni: Optional[int] = None
     telefono: Optional[int] = None
-    fechaNacimiento: Optional[date] = None
+    fecha_nacimiento: Optional[date] = None
 
 # ---------- TURNOS -------------
 

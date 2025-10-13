@@ -15,12 +15,12 @@ async def root():
 @app.post("/personas", response_model=PersonaOut ,status_code=status.HTTP_201_CREATED) 
 def crear_persona(persona: PersonaCreate):
     try:
-        dniValido = session.query(PersonaDB).filter(PersonaDB.dni == persona.dni).first()
-        if dniValido:
+        dni_valido = session.query(PersonaDB).filter(PersonaDB.dni == persona.dni).first()
+        if dni_valido:
             raise HTTPException(status_code=409, detail="El número de DNI ya está registrado.")
 
-        emailValido = session.query(PersonaDB).filter(PersonaDB.email == persona.email).first()
-        if emailValido:
+        email_valido = session.query(PersonaDB).filter(PersonaDB.email == persona.email).first()
+        if email_valido:
             raise HTTPException(status_code=409, detail="El email ya está registrado.")
 
         persona_nueva = PersonaDB( 
@@ -28,7 +28,7 @@ def crear_persona(persona: PersonaCreate):
             email=persona.email.lower().strip(),
             dni=persona.dni,
             telefono=persona.telefono,
-            fechaNacimiento=persona.fechaNacimiento,
+            fechaNacimiento=persona.fecha_nacimiento,
         ) 
         session.add(persona_nueva)
         session.commit()
@@ -77,17 +77,17 @@ def eliminar_persona(id: int):
 @app.put("/personas/{id}", response_model=PersonaOut)
 def modificar_persona(id:int, persona:PersonaCreate):
     try:
-        personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
-        if personaCambio is None:
+        persona_cambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+        if persona_cambio is None:
             raise HTTPException(status_code=404, detail="Persona no encontrada.")
-        personaCambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
-        personaCambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
-        personaCambio.dni = persona.dni #if personaCambio.dni is not None else None
-        personaCambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
-        personaCambio.fechaNacimiento = persona.fechaNacimiento #if personaCambio.fechaNacimiento is not None else None
+        persona_cambio.nombre = persona.nombre.strip() #if personaCambio.nombre is not None else None
+        persona_cambio.email = persona.email.lower().strip() #if personaCambio.email is not None else None
+        persona_cambio.dni = persona.dni #if personaCambio.dni is not None else None
+        persona_cambio.telefono = persona.telefono #if personaCambio.telefono is not None else None
+        persona_cambio.fecha_nacimiento = persona.fecha_nacimiento #if personaCambio.fechaNacimiento is not None else None
     
         session.commit()
-        session.refresh(personaCambio)
+        session.refresh(persona_cambio)
     except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
         session.rollback()
         msg = str(e.orig).lower()
@@ -100,21 +100,21 @@ def modificar_persona(id:int, persona:PersonaCreate):
         session.rollback()
         raise HTTPException(status_code=400, detail= str(e))
 
-    return to_persona_out(personaCambio)
+    return to_persona_out(persona_cambio)
 
 @app.patch("/personas/{id}", response_model=PersonaOut)
 def patchPersona(id: int, persona: PersonaUpdate):
     try:
-        personaCambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
-        if personaCambio is None:
+        persona_cambio = session.query(PersonaDB).filter(PersonaDB.id == id).first()
+        if persona_cambio is None:
             raise HTTPException(status_code=404, detail="Persona no encontrada.")
         
         updates = persona.model_dump(exclude_unset=True)
         for campo, valor in updates.items():
-            setattr(personaCambio, campo, valor)
+            setattr(persona_cambio, campo, valor)
 
         session.commit()
-        session.refresh(personaCambio)
+        session.refresh(persona_cambio)
     except IntegrityError as e: # Error de integridad (dni/mail duplicados o mail mal escrito)
         session.rollback()
         msg = str(e.orig).lower()
@@ -127,7 +127,7 @@ def patchPersona(id: int, persona: PersonaUpdate):
         session.rollback()
         raise HTTPException(status_code=400, detail= str(e))
 
-    return to_persona_out(personaCambio)
+    return to_persona_out(persona_cambio)
 
 ################################## Turnos ###################################
 #Post turno
@@ -185,8 +185,8 @@ def crear_turno(turno: TurnoCreate):
             id=persona.id,
             nombre=persona.nombre,
             dni=persona.dni,
-            fechaNacimiento=persona.fechaNacimiento,
-            edad=calcular_edad(persona.fechaNacimiento)
+            fechaNacimiento=persona.fecha_nacimiento,
+            edad=calcular_edad(persona.fecha_nacimiento)
         )
     )    
     except Exception as e:
@@ -197,21 +197,21 @@ def crear_turno(turno: TurnoCreate):
 #Put turno
 @app.put("/turnos/{id}", response_model=TurnoOut)
 def modificar_Turno(id:int, turno:TurnoCreate):
-    turnoCambio = session.query(TurnoDB).filter(TurnoDB.id == id).first()
-    if turnoCambio is None:
+    turno_cambio = session.query(TurnoDB).filter(TurnoDB.id == id).first()
+    if turno_cambio is None:
         raise HTTPException(status_code=404, detail="Turno no encontrado.")
-    turnoCambio.fecha = turno.fecha #if turnoCambio.fecha is not None else None
-    turnoCambio.hora = turno.hora #if turnoCambio.hora is not None else None
-    turnoCambio.estado = turno.estado #if turno.estado is not None else None
-    turnoCambio.id_persona = turno.id_persona #if turnoCambio.id_persona is not None else None
+    turno_cambio.fecha = turno.fecha #if turnoCambio.fecha is not None else None
+    turno_cambio.hora = turno.hora #if turnoCambio.hora is not None else None
+    turno_cambio.estado = turno.estado #if turno.estado is not None else None
+    turno_cambio.id_persona = turno.id_persona #if turnoCambio.id_persona is not None else None
     try:
         session.commit()
-        session.refresh(turnoCambio)
+        session.refresh(turno_cambio)
     except Exception:
         session.rollback()
         raise HTTPException(status_code=400, detail="Error al modificar el turno.")
 
-    return to_turno_out(turnoCambio)
+    return to_turno_out(turno_cambio)
 
 #Delete turno (fisico)
 @app.delete("/turnos/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -249,8 +249,8 @@ async def listar_turnos_tomados():
                 id=persona.id,
                 nombre=persona.nombre,
                 dni=persona.dni,
-                fechaNacimiento=persona.fechaNacimiento,
-                edad=calcular_edad(persona.fechaNacimiento)
+                fechaNacimiento=persona.fecha_nacimiento,
+                edad=calcular_edad(persona.fecha_nacimiento)
             )
         ))
     return turnos
@@ -272,8 +272,8 @@ def traer_turno_id(id: int):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fechaNacimiento,
-            edad=calcular_edad(turno.persona.fechaNacimiento)
+            fechaNacimiento=turno.persona.fecha_nacimiento,
+            edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
 
@@ -334,8 +334,8 @@ def actualizar_estado_turno_cancelar(id: int):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fechaNacimiento,
-            edad=calcular_edad(turno.persona.fechaNacimiento)
+            fechaNacimiento=turno.persona.fecha_nacimiento,
+            edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
 
@@ -367,8 +367,8 @@ def actualizar_estado_turno_confirmar(id: int, turno_update: TurnoEstadoUpdate):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fechaNacimiento,
-            edad=calcular_edad(turno.persona.fechaNacimiento)
+            fechaNacimiento=turno.persona.fecha_nacimiento,
+            edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
 
