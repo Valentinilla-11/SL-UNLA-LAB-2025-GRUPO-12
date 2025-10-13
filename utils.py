@@ -4,12 +4,12 @@ from estadoEnum import EstadoEnum
 from models import PersonaOut, TurnoOut
 from database import PersonaDB, Session, TurnoDB 
 
-def calcular_edad(fechaNacimiento: date) -> int:
+def calcular_edad(fecha_nacimiento: date) -> int:
     hoy = date.today()
-    edad = hoy.year - fechaNacimiento.year
+    edad = hoy.year - fecha_nacimiento.year
 
     #Si la persona no cumplió años todavía se le resta 1
-    if (hoy.month, hoy.day) < (fechaNacimiento.month, fechaNacimiento.day):
+    if (hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
         edad -= 1
     return edad
 
@@ -20,8 +20,8 @@ def to_persona_out(p: PersonaDB) -> PersonaOut:
         email=p.email,
         dni=p.dni,
         telefono=p.telefono,
-        fechaNacimiento=p.fechaNacimiento,
-        edad=calcular_edad(p.fechaNacimiento),
+        fecha_nacimiento=p.fecha_nacimiento,
+        edad=calcular_edad(p.fecha_nacimiento),
         habilitado=p.habilitado
     )
 

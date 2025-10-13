@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, constr, field_validator
 from datetime import date, time
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from estadoEnum import EstadoEnum
 
 # ---------- PERSONAS -------------
@@ -102,3 +102,13 @@ class TurnoUpdate(BaseModel):
 #para patch de estado
 class TurnoEstadoUpdate(BaseModel):
     estado: EstadoEnum
+
+
+class PersonaConTurnosOut(BaseModel):
+    id: int
+    nombre: str
+    dni: str
+    fecha_nacimiento: date
+    edad: int
+    habilitado: bool
+    turnos: List[TurnoOut] = []

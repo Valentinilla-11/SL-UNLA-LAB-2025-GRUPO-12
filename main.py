@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
-from models import PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
+from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido
 from sqlalchemy.exc import IntegrityError
 from estadoEnum import EstadoEnum
+from fastapi import HTTPException
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -28,7 +30,7 @@ def crear_persona(persona: PersonaCreate):
             email=persona.email.lower().strip(),
             dni=persona.dni,
             telefono=persona.telefono,
-            fechaNacimiento=persona.fecha_nacimiento,
+            fecha_nacimiento=persona.fecha_nacimiento,
         ) 
         session.add(persona_nueva)
         session.commit()
@@ -185,7 +187,7 @@ def crear_turno(turno: TurnoCreate):
             id=persona.id,
             nombre=persona.nombre,
             dni=persona.dni,
-            fechaNacimiento=persona.fecha_nacimiento,
+            fecha_nacimiento=persona.fecha_nacimiento,
             edad=calcular_edad(persona.fecha_nacimiento)
         )
     )    
@@ -249,7 +251,7 @@ async def listar_turnos_tomados():
                 id=persona.id,
                 nombre=persona.nombre,
                 dni=persona.dni,
-                fechaNacimiento=persona.fecha_nacimiento,
+                fecha_nacimiento=persona.fecha_nacimiento,
                 edad=calcular_edad(persona.fecha_nacimiento)
             )
         ))
@@ -272,7 +274,7 @@ def traer_turno_id(id: int):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fecha_nacimiento,
+            fecha_nacimiento=turno.persona.fecha_nacimiento,
             edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
@@ -334,7 +336,7 @@ def actualizar_estado_turno_cancelar(id: int):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fecha_nacimiento,
+            fecha_nacimiento=turno.persona.fecha_nacimiento,
             edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
@@ -367,7 +369,7 @@ def actualizar_estado_turno_confirmar(id: int, turno_update: TurnoEstadoUpdate):
             id=turno.persona.id,
             nombre=turno.persona.nombre,
             dni=turno.persona.dni,
-            fechaNacimiento=turno.persona.fecha_nacimiento,
+            fecha_nacimiento=turno.persona.fecha_nacimiento,
             edad=calcular_edad(turno.persona.fecha_nacimiento)
         )
     )
@@ -389,3 +391,88 @@ def actualizar_estado_turno_asistido(id: int):
         session.rollback()
         raise HTTPException(status_code=400, detail= str(e))
     return turno
+
+#Punto E 
+#Reportes por persona con el dni
+@app.get("/reportes/turnos-por-persona/{dni}", response_model=PersonaConTurnosOut)
+def reportes_turnos_por_persona(dni: int):
+    try:
+        persona = session.query(PersonaDB).filter(PersonaDB.dni == dni).first()
+        if not persona:
+            raise Exception("La persona con ese DNI no se encuentra en la base de datos")
+
+        turnos_bd = session.query(TurnoDB).filter(TurnoDB.id_persona == persona.id).all()
+
+        turnos: list[TurnoOut] = [
+            TurnoOut(
+                id=turno.id,
+                fecha=turno.fecha,
+                hora=turno.hora,
+                estado=turno.estado,
+                id_persona=turno.id_persona
+            )
+            for turno in turnos_bd
+        ]
+        if turnos is None:
+            raise Exception("La persona no tiene turnos asignados") 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) 
+    return PersonaConTurnosOut(
+        id=persona.id,
+        nombre=persona.nombre,
+        dni=str(persona.dni), 
+        fecha_nacimiento=persona.fecha_nacimiento,
+        edad=calcular_edad(persona.fecha_nacimiento),
+        habilitado=persona.habilitado,
+        turnos=turnos
+    )
+
+
+#GET /reportes/turnos-cancelados?min=5
+@app.get("/reportes/turnos-cancelados")
+def reportes_personas_con_turnos_cancelados():
+    limite_fecha = datetime.now() - timedelta(days=180)
+
+    personas_bd = session.query(PersonaDB).all()
+    if not personas_bd:
+        raise HTTPException(status_code=404, detail="No hay personas cargadas en la base de datos.")
+
+    personas = []
+    for persona in personas_bd:
+        turnos_cancelados = session.query(TurnoDB).filter(
+            TurnoDB.id_persona == persona.id,
+            TurnoDB.estado == EstadoEnum.CANCELADO,
+            TurnoDB.fecha >= limite_fecha
+        ).all()
+
+        if len(turnos_cancelados) >= 5:
+            personas.append({
+                "persona": {
+                    "id": persona.id,
+                    "nombre": persona.nombre,
+                    "email": persona.email,
+                    "dni": str(persona.dni),
+                    "telefono": persona.telefono,
+                    "fecha_nacimiento": persona.fecha_nacimiento,
+                    "edad": calcular_edad(persona.fecha_nacimiento),
+                    "habilitado": persona.habilitado
+                },
+                "cantidad_cancelados": len(turnos_cancelados),
+                "turnos_cancelados": [
+                    {
+                        "id": turno.id,
+                        "fecha": turno.fecha,
+                        "hora": turno.hora,
+                        "estado": turno.estado
+                    }
+                    for turno in turnos_cancelados
+                ]
+            })
+    
+    if not personas:
+        raise HTTPException(status_code=404, detail="No hay personas que cumplan con el criterio.")
+    return{
+        "Cantidad de personas con 5 o mas turnos cancelados": len(personas),
+        "Personas": personas
+    }
+
