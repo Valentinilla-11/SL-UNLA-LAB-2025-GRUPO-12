@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr, constr, field_validator
 from datetime import date, time
 from typing import Annotated, Optional
-import enum
 from estadoEnum import EstadoEnum
 
 # ---------- PERSONAS -------------

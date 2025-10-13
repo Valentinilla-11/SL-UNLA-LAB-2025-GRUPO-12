@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey, Time, Enum
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, ForeignKey, Time
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 engine = create_engine('sqlite:///tp_python.db') 

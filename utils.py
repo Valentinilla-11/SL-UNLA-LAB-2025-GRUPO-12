@@ -1,5 +1,4 @@
 from datetime import date, timedelta, datetime
-from http.client import HTTPException
 import json
 from estadoEnum import EstadoEnum
 from models import PersonaOut, TurnoOut
