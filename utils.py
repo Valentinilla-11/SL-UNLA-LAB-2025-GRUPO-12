@@ -73,3 +73,60 @@ def validar_estado_solo_asistido (turno: TurnoDB):
    if turno.estado == EstadoEnum.ASISTIDO:
         raise  Exception ("No se puede eliminar un turno que ya fue ASISTIDO")
    return True
+
+def buscar_persona_por_dni (dni: str, session: Session):
+    persona = session.query(PersonaDB).filter(PersonaDB.dni == dni).first()
+    if not persona:
+        raise Exception ("La persona con DNI {} no existe". format (dni))
+    
+    return persona
+
+def buscar_turnos_por_persona (id_persona: int, session: Session):
+    turnos = session.query(TurnoDB).filter(TurnoDB.id_persona == id_persona).all()
+    if not turnos:
+        raise Exception ("La persona no tiene turnos asignados")
+    return turnos
+
+def limite_fecha(dias: int):
+    limite_fecha = datetime.now() - timedelta(days=dias)
+    return limite_fecha
+
+def personas_con_turnos_cancelados(session: Session, limite_fecha: datetime):
+    personas_bd = session.query(PersonaDB).all()
+    personas_con_cancelados = []
+
+    for persona in personas_bd:
+        turnos_cancelados = session.query(TurnoDB).filter(
+            TurnoDB.id_persona == persona.id,
+            TurnoDB.estado == EstadoEnum.CANCELADO,
+            TurnoDB.fecha >= limite_fecha
+        ).all()
+
+        if len(turnos_cancelados) >= 5:
+            personas_con_cancelados.append({
+                "persona": {
+                    "id": persona.id,
+                    "nombre": persona.nombre,
+                    "email": persona.email,
+                    "dni": str(persona.dni),
+                    "telefono": persona.telefono,
+                    "fecha_nacimiento": persona.fecha_nacimiento,
+                    "edad": calcular_edad(persona.fecha_nacimiento),
+                    "habilitado": persona.habilitado
+                },
+                "cantidad_cancelados": len(turnos_cancelados),
+                "turnos_cancelados": [
+                    {
+                        "id": turno.id,
+                        "fecha": turno.fecha,
+                        "hora": turno.hora,
+                        "estado": turno.estado
+                    }
+                    for turno in turnos_cancelados
+                ]
+            })
+
+        if not personas_bd:
+            raise Exception("No hay personas en la base de datos")
+
+    return personas_con_cancelados

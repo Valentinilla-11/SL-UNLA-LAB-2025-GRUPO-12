@@ -103,7 +103,7 @@ class TurnoUpdate(BaseModel):
 class TurnoEstadoUpdate(BaseModel):
     estado: EstadoEnum
 
-
+#Para mostrar el reporte de personas con turnos por dni 
 class PersonaConTurnosOut(BaseModel):
     id: int
     nombre: str
