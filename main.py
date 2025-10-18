@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, status
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
-from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido, buscar_persona_por_dni, buscar_turnos_por_persona, limite_fecha, personas_con_turnos_cancelados
+from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido, obtener_persona_por_dni, obtener_turnos_por_persona, calcular_limite_fecha, obtener_personas_con_turnos_cancelados
 from sqlalchemy.exc import IntegrityError
 from estadoEnum import EstadoEnum
 from fastapi import HTTPException
@@ -397,9 +397,8 @@ def actualizar_estado_turno_asistido(id: int):
 @app.get("/reportes/turnos-por-persona/{dni}", response_model=PersonaConTurnosOut)
 def reportes_turnos_por_persona(dni: int):
     try:
-        persona = buscar_persona_por_dni (dni, session)
-
-        turnos_bd = buscar_turnos_por_persona (persona.id, session)
+        persona = obtener_persona_por_dni (dni, session)
+        turnos_bd = obtener_turnos_por_persona (persona.id, session)
 
         turnos: list[TurnoOut] = [
             TurnoOut(
@@ -414,6 +413,7 @@ def reportes_turnos_por_persona(dni: int):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) 
+    
     return PersonaConTurnosOut(
         id=persona.id,
         nombre=persona.nombre,
@@ -426,12 +426,12 @@ def reportes_turnos_por_persona(dni: int):
 
 #GET /reportes/turnos-cancelados?min=5
 @app.get("/reportes/turnos-cancelados")
-def reportes_personas_con_turnos_cancelados():
-    limite_fecha = limite_fecha (180)
+def reportes_personas_con_turnos_cancelados(min: int = 5):
 
-    personas = personas_con_turnos_cancelados(session, limite_fecha)
+    limite= calcular_limite_fecha (180)
+    personas = obtener_personas_con_turnos_cancelados(session, limite, min)
     return{
-        "Cantidad de personas con 5 o mas turnos cancelados": len(personas),
+        f"Cantidad de personas con {min} o mas turnos cancelados": len(personas),
         "Personas": personas
     }
 

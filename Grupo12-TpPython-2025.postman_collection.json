@@ -937,6 +937,59 @@
 			]
 		},
 		{
+			"name": "GetTurnoPorPersonaDni",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/reportes/turnos-por-persona/46747198",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reportes",
+						"turnos-por-persona",
+						"46747198"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetReportesTurnosCanceladosMin5",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/reportes/turnos-cancelados",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"reportes",
+						"turnos-cancelados"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "root",
 			"request": {
 				"method": "GET",
