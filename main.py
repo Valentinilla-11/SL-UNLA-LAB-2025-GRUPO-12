@@ -492,4 +492,6 @@ def turnos_cancelados_por_mes():
             "hora": turno.hora.strftime("%H:%M"),
             "estado": turno.estado
         })
+    if not resultado:
+        raise HTTPException(status_code=404, detail="No hay Turnos cancelados para ese mes.")
     return resultado
