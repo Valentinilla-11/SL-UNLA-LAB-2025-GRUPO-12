@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from fastapi import FastAPI, HTTPException, status
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido, obtener_persona_por_dni, obtener_turnos_por_persona, calcular_limite_fecha, obtener_personas_con_turnos_cancelados
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import extract
 from estadoEnum import EstadoEnum
 from fastapi import HTTPException
-from datetime import datetime, timedelta
+
 
 app = FastAPI()
 
@@ -435,3 +436,60 @@ def reportes_personas_con_turnos_cancelados(min: int = 5):
         "Personas": personas
     }
 
+@app.get("/reportes/turnos-por-fecha", response_model=list[TurnoConPersonaOut])
+def turnos_por_fecha(fecha: date):
+    turnos = session.query(TurnoDB).join(PersonaDB).filter(TurnoDB.fecha == fecha).all()
+
+
+
+    resultado = []
+    for turno in turnos:
+        persona = turno.persona
+        persona_out = PersonaOutTurno(
+            id=persona.id,
+            nombre=persona.nombre,
+            dni=persona.dni,
+            fecha_nacimiento=persona.fecha_nacimiento,
+            edad=calcular_edad(persona.fecha_nacimiento)
+        )
+        resultado.append(
+            TurnoConPersonaOut(
+                id=turno.id,
+                fecha=turno.fecha,
+                hora=turno.hora,
+                estado=turno.estado,
+                persona=persona_out
+            )
+        )
+    if not resultado:
+        raise HTTPException(status_code=404, detail="No hay Turnos cargados para esa fecha.")
+    return resultado
+
+@app.get("/reportes/turnos-cancelados-por-mes")
+def turnos_cancelados_por_mes():
+    hoy = datetime.today()
+    mes_actual = hoy.month
+    anio_actual = hoy.year
+
+    turnos = session.query(TurnoDB).filter(
+        TurnoDB.estado == "CANCELADO",
+        extract("month", TurnoDB.fecha) == mes_actual,
+        extract("year", TurnoDB.fecha) == anio_actual
+    ).all()
+
+    resultado = {
+        "anio": anio_actual,
+        "mes": mes_actual,
+        "cantidad": len(turnos),
+        "turnos": []
+    }
+
+    for turno in turnos:
+        resultado["turnos"].append({
+            "id": turno.id,
+            "persona_id": turno.id_persona,
+            "fecha": turno.fecha,
+            "hora": turno.hora.strftime("%H:%M"),
+            "estado": turno.estado
+        })
+    return resultado
