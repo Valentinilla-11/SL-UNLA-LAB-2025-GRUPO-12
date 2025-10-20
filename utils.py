@@ -130,3 +130,21 @@ def obtener_personas_con_turnos_cancelados(session: Session, limite_fecha: datet
                 ]
             })
     return personas_con_cancelados
+def obtener_turnos_entre_fechas(fechaDesde: date, fechaHasta: date, session: Session):
+    
+    turnos_confirmados = session.query(TurnoDB).filter(
+        (TurnoDB.fecha >= fechaDesde) & (TurnoDB.fecha <= fechaHasta)
+    ).all()
+
+    if not turnos_confirmados:
+        raise Exception("No hay turnos registrados entre esas fechas.")
+
+    return turnos_confirmados
+
+def obtener_personas_por_estado(estado: bool, session: Session):
+    personas_estado = session.query(PersonaDB).filter(PersonaDB.habilitado == estado).all()
+
+    if not personas_estado:
+        raise Exception("No hay personas con ese estado.")
+    
+    return personas_estado

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 from fastapi import FastAPI, HTTPException, status
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
-from utils import leer_horarios, persona_habilitada, to_persona_out, to_time, to_turno_out, calcular_edad, validar_estado, validar_estado_solo_asistido, obtener_persona_por_dni, obtener_turnos_por_persona, calcular_limite_fecha, obtener_personas_con_turnos_cancelados
+from utils import *
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import extract
 from estadoEnum import EstadoEnum
@@ -495,3 +495,24 @@ def turnos_cancelados_por_mes():
     if not resultado:
         raise HTTPException(status_code=404, detail="No hay Turnos cancelados para ese mes.")
     return resultado
+
+# GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
+@app.get("/reportes/turnos-confirmados")
+def reportes_turnos_entre_fechas(desde: date, hasta: date):
+    try:
+        turnos_confirmados = obtener_turnos_entre_fechas(desde, hasta, session)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return turnos_confirmados
+        
+
+# GET /reportes/estado-personas?habilitada=true/false
+@app.get("/reportes/estado-personas")
+def reportes_personas_estado_habilitacion(habilitada: bool):
+    try:
+        personas_por_estado = obtener_personas_por_estado(habilitada, session)
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+    
+    return personas_por_estado
