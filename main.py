@@ -322,6 +322,9 @@ def actualizar_estado_turno_cancelar(id: int):
         validar_estado(turno) 
         turno.estado = EstadoEnum.CANCELADO
         
+        persona_db = session.query (PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
+        habilitada_persona= persona_habilitada (persona_db, session) 
+
         session.commit()
         session.refresh(turno)
     except Exception as e:
@@ -425,14 +428,17 @@ def reportes_turnos_por_persona(dni: int):
         turnos=turnos
     )
 
-#GET /reportes/turnos-cancelados?min=5
+#GET /reportes/turnos-cancelados?min=int
 @app.get("/reportes/turnos-cancelados")
-def reportes_personas_con_turnos_cancelados(min: int = 5):
-
-    limite= calcular_limite_fecha (180)
-    personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+def reportes_personas_con_turnos_cancelados(min: int):
+    try:
+        limite= calcular_limite_fecha (180)
+        personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
     return{
-        f"Cantidad de personas con {min} o mas turnos cancelados": len(personas),
+        "Cantidad_con_cancelados": len(personas),
         "Personas": personas
     }
 
