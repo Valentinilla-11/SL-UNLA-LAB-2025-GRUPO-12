@@ -1,8 +1,9 @@
 from datetime import date, timedelta, datetime
 import json
 from estadoEnum import EstadoEnum
-from models import PersonaOut, TurnoOut
+from models import PersonaOut, TurnoOut, PersonaConTurnosOut
 from database import PersonaDB, Session, TurnoDB 
+from typing import List
 
 def calcular_edad(fecha_nacimiento: date) -> int:
     hoy = date.today()
@@ -140,6 +141,34 @@ def obtener_turnos_entre_fechas(fechaDesde: date, fechaHasta: date, session: Ses
         raise Exception("No hay turnos registrados entre esas fechas.")
 
     return turnos_confirmados
+
+def obtener_turnos_por_persona_con_lista(turnos: List[TurnoDB], session: Session):
+    personas_con_turnos = []
+    ids_personas = []
+    for turno in turnos:
+        if turno.id_persona not in ids_personas:
+            ids_personas.append(turno.id_persona)
+            persona = session.query(PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
+
+            persona_out = PersonaConTurnosOut(
+                id= persona.id,
+                nombre= persona.nombre,
+                dni= str(persona.dni),
+                fecha_nacimiento= persona.fecha_nacimiento,
+                edad= calcular_edad(persona.fecha_nacimiento),
+                habilitado= persona.habilitado,
+                turnos= []
+            )
+
+            persona_out.turnos.append(TurnoOut.model_validate(turno, from_attributes=True))
+            personas_con_turnos.append(persona_out)
+        else:
+            for p in personas_con_turnos:
+                if p.id == turno.id_persona:
+                    p.turnos.append(TurnoOut.model_validate(turno, from_attributes=True))
+                    break
+    return personas_con_turnos
+            
 
 def obtener_personas_por_estado(estado: bool, session: Session):
     personas_estado = session.query(PersonaDB).filter(PersonaDB.habilitado == estado).all()

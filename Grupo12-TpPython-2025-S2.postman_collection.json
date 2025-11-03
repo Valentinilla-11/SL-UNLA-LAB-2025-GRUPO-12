@@ -1,0 +1,1342 @@
+{
+	"info": {
+		"_postman_id": "34abca90-77d4-4e42-baba-02e67f3423da",
+		"name": "Grupo12-TpPython-2025-S1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16622049"
+	},
+	"item": [
+		{
+			"name": "CRUD-Persona",
+			"item": [
+				{
+					"name": "postPersona",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Irina Ibañez\",\r\n    \"email\": \"irinaI@gmail.com\",\r\n    \"dni\": 49545613,\r\n    \"telefono\": 1191252194,\r\n    \"fecha_nacimiento\": \"2001-01-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersona2",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Rocio Pérez\",\r\n    \"email\": \"rociop@gmail.com\",\r\n    \"dni\": 44587412,\r\n    \"telefono\": 1125423594,\r\n    \"fecha_nacimiento\": \"2002-10-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorDniDuplicado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl2@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaDniInvalido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl3@gmail.com\",\r\n    \"dni\": 43545,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaFechaInvalida",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2029-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorMailDuplicado",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 42546754,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaErrorMailInvalido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Esteban Lorca\",\r\n    \"email\": \"estebanl\",\r\n    \"dni\": 42545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postPersonaMissingField",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonaById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonaByIdNoEncontrada",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas/45",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"45"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPersonas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/personas",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaOk",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaDniDuplicado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaMailDuplicado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454546,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaDniInvalido",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 454,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaMailInvalido",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor.com\",\r\n    \"dni\": 45454549,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putPersonaIdNoEncontrado",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\": \"Francisco Robles\",\r\n    \"email\": \"Franciscor@gmail.com\",\r\n    \"dni\": 45454545,\r\n    \"telefono\": 1123548574,\r\n    \"fechaNacimiento\": \"2001-05-30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/89",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"89"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaOk",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email2@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaDniDuplicado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"dni\": 45454545\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaMailDuplicado",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchPersonaNoEncontrada",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"Franciscor@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/personas/99",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePersona",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8000/personas/4",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePersonaNoEncontrada",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8000/personas/56",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"personas",
+								"56"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CRUD-Turnos",
+			"item": [
+				{
+					"name": "GetTurnos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "putTurno",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fecha\": \"2025-09-29\",\r\n    \"hora\": \"15:00\",\r\n    \"estado\": \"ASISTIDO\",\r\n    \"id_persona\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos/90",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"90"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-11-26\",\r\n  \"hora\": \"15:30:00\",\r\n  \"id_persona\": 6\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoPersonaConCancelados",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"14:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoPersonaNoCargada",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 6\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoYaTomado",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"16:30:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoHoraFueraDelHorarioPermitido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-23\",\r\n  \"hora\": \"08:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PostTurnoConFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fecha\": \"2025-09-01\",\r\n  \"hora\": \"09:00\",\r\n  \"id_persona\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTurnoByIdOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesTodos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesFechaInvalida",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-01",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHorariosDisponiblesAlgunos",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos-disponibles?fecha=2025-09-23",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos-disponibles"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2025-09-23"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetTurnoByIdInvalido",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/99",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoCancelarOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/8/cancelar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"8",
+								"cancelar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoCancelarError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/1/cancelar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"1",
+								"cancelar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoConfirmarOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/5/confirmar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"5",
+								"confirmar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchTurnoConfirmarError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/1/confirmar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"1",
+								"confirmar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTurnoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteTurnoError",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turnos/5",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turnos",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PatchAsistidoOk",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/turno/5/asistido",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"turno",
+								"5",
+								"asistido"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reportes",
+			"item": [
+				{
+					"name": "reporteTurnoConfirmado",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"estebanl@gmail.com\",\r\n    \"dni\": 43545613,\r\n    \"telefono\": 1121452123,\r\n    \"fechaNacimiento\": \"2024-05-29\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8000/reportes/turnos-confirmados?desde=2025-11-01&hasta=2025-11-30&page=2",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"reportes",
+								"turnos-confirmados"
+							],
+							"query": [
+								{
+									"key": "desde",
+									"value": "2025-11-01"
+								},
+								{
+									"key": "hasta",
+									"value": "2025-11-30"
+								},
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reportePersonasPorEstado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/reportes/estado-personas?habilitada=true",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"reportes",
+								"estado-personas"
+							],
+							"query": [
+								{
+									"key": "habilitada",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "root",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

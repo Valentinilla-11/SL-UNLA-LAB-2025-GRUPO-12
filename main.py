@@ -6,10 +6,14 @@ from utils import *
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import extract
 from estadoEnum import EstadoEnum
-from fastapi import HTTPException
-
+from fastapi import HTTPException, Query
+from math import ceil
+from dotenv import load_dotenv
+import os
 
 app = FastAPI()
+
+load_dotenv()
 
 @app.get("/")
 async def root():
@@ -504,13 +508,33 @@ def turnos_cancelados_por_mes():
 
 # GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
 @app.get("/reportes/turnos-confirmados")
-def reportes_turnos_entre_fechas(desde: date, hasta: date):
+def reportes_turnos_entre_fechas(
+    desde: date, 
+    hasta: date, 
+    page: int = Query(1, ge=1), 
+):
+    size = int(os.environ["REGISTROS_POR_PAGINA"])
     try:
-        turnos_confirmados = obtener_turnos_entre_fechas(desde, hasta, session)
+        turnos_por_fecha = obtener_turnos_entre_fechas(desde, hasta, session)
+        turnos_confirmados = obtener_turnos_por_persona_con_lista(turnos_por_fecha, session)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+    items = len(turnos_confirmados)
+    pages = ceil(items / size) if items else 1
+    inicio = (page - 1) * size
+    fin = inicio + size
+    response = turnos_confirmados[inicio:fin]
 
-    return turnos_confirmados
+    return {
+        "meta": {
+            "page": page,
+            "size": size,
+            "items": items,
+            "pages": pages,
+        },
+        "data": response
+    }
         
 
 # GET /reportes/estado-personas?habilitada=true/false
