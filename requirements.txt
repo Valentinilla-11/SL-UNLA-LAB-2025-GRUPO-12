@@ -3,3 +3,5 @@ sqlalchemy
 uvicorn
 email-validator
 python-dotenv
+borb
+pandas
