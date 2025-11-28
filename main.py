@@ -9,7 +9,11 @@ from estadoEnum import EstadoEnum
 from fastapi import HTTPException, Query
 from math import ceil
 from dotenv import load_dotenv
+from fastapi.responses import FileResponse
+
 import os
+import pandas as pd
+from borb.pdf import Document, Page, SingleColumnLayout, Paragraph, PDF, FixedColumnWidthTable
 
 app = FastAPI()
 
@@ -546,3 +550,162 @@ def reportes_personas_estado_habilitacion(habilitada: bool):
         raise HTTPException(status_code=404,detail=str(e))
     
     return personas_por_estado
+
+
+# GET /reportes/csv/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
+@app.get("/reportes/csv/turnos-confirmados")
+def csv_turnos_confirmados(desde: date, hasta: date):
+    try:
+        turnos_por_fecha = obtener_turnos_entre_fechas(desde, hasta, session)
+        personas_con_turnos = obtener_turnos_por_persona_con_lista(turnos_por_fecha, session)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    filas = []
+    for persona in personas_con_turnos:
+        for turno in persona.turnos:
+            filas.append({
+                "turno_id": turno.id,
+                "fecha_turno": turno.fecha,
+                "hora_turno": turno.hora,
+                "estado": turno.estado,
+                "persona": persona.nombre,
+                "dni": persona.dni
+            })
+
+    df = pd.DataFrame(filas)
+
+    nombre_archivo = "turnos_confirmados_por_fecha.csv"
+    df.to_csv(nombre_archivo, index=False)
+
+    return FileResponse(
+        nombre_archivo,
+        media_type="text/csv",
+        filename=nombre_archivo
+    )
+
+# GET /reportes/csv/estado-personas
+@app.get("/reportes/csv/estado-personas")
+def csv_estado_personas(habilitada: bool):
+    try:
+        personas = obtener_personas_por_estado(habilitada, session)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    filas = []
+    for persona in personas:
+        filas.append({
+            "nombre": persona.nombre,
+            "dni": persona.dni,
+            "habilitado": persona.habilitado
+        })
+
+    df = pd.DataFrame(filas)
+
+    nombre_archivo = "estado_personas.csv"
+    df.to_csv(nombre_archivo, index=False)
+
+    return FileResponse(
+        nombre_archivo,
+        media_type="text/csv",
+        filename=nombre_archivo
+    )
+
+# GET /reportes/pdf/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
+@app.get("/reportes/pdf/turnos-confirmados")
+def pdf_turnos_confirmados(desde: date, hasta: date):
+    try:
+        turnos_por_fecha = obtener_turnos_entre_fechas(desde, hasta, session)
+        personas_con_turnos = obtener_turnos_por_persona_con_lista(turnos_por_fecha, session)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    filas = []
+    for persona in personas_con_turnos:
+        for turno in persona.turnos:
+            filas.append({
+                "turno_id": turno.id,
+                "fecha_turno": turno.fecha,
+                "hora_turno": turno.hora,
+                "estado": turno.estado,
+                "persona": persona.nombre,
+                "dni": persona.dni
+            })
+    
+    df = pd.DataFrame(filas)
+
+    doc = Document()
+    page = Page()
+    doc.append_page(page)
+    layout = SingleColumnLayout(page)
+
+    tabla = FixedColumnWidthTable(
+        number_of_rows= len(df) + 1,
+        number_of_columns= len(df.columns)
+    )
+
+    for col in df.columns:
+        tabla.append_layout_element(Paragraph(col.capitalize()))
+
+    for _, row in df.iterrows():
+        for value in row:
+            tabla.append_layout_element(Paragraph(str(value)))
+
+    layout.append_layout_element(tabla)
+
+    nombre_archivo = "turnos_confirmados_por_fecha.pdf"
+    
+    PDF.write(what=doc, where_to=nombre_archivo)
+
+    return FileResponse(
+        nombre_archivo,
+        media_type="application/pdf",
+        filename=nombre_archivo
+    )
+
+# GET /reportes/pdf/estado-personas
+@app.get("/reportes/pdf/estado-personas")
+def csv_estado_personas(habilitada: bool):
+    try:
+        personas = obtener_personas_por_estado(habilitada, session)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    filas = []
+    for persona in personas:
+        filas.append({
+            "nombre": persona.nombre,
+            "dni": persona.dni,
+            "habilitado": persona.habilitado
+        })
+
+    df = pd.DataFrame(filas)
+
+    doc = Document()
+    page = Page()
+    doc.append_page(page)
+    layout = SingleColumnLayout(page)
+
+    tabla = FixedColumnWidthTable(
+        number_of_rows= len(df) + 1,
+        number_of_columns= len(df.columns)
+    )
+
+    for col in df.columns:
+        tabla.append_layout_element(Paragraph(col.capitalize()))
+
+    for _, row in df.iterrows():
+        for value in row:
+            tabla.append_layout_element(Paragraph(str(value)))
+
+    layout.append_layout_element(tabla)
+
+    nombre_archivo = "estado_personas.pdf"
+    
+    PDF.write(what=doc, where_to=nombre_archivo)
+
+    return FileResponse(
+        nombre_archivo,
+        media_type="application/pdf",
+        filename=nombre_archivo
+    )

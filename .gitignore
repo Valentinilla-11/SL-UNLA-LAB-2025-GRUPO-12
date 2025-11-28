@@ -2,3 +2,7 @@
 tp/
 __pycache__/
 tp_python.db
+turnos_confirmados_por_fecha.csv
+estado_personas.csv
+turnos_confirmados_por_fecha.pdf
+estado_personas.pdf
