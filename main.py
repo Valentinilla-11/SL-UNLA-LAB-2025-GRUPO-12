@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, date
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import FileResponse
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import *
@@ -10,9 +11,10 @@ from fastapi import HTTPException, Query
 from math import ceil
 from dotenv import load_dotenv
 from fastapi.responses import FileResponse
-
-import os
 import pandas as pd
+from dotenv import load_dotenv
+import os
+from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement
 from borb.pdf import Document, Page, SingleColumnLayout, Paragraph, PDF, FixedColumnWidthTable
 
 app = FastAPI()
@@ -436,11 +438,16 @@ def reportes_turnos_por_persona(dni: int):
         turnos=turnos
     )
 
+#uso las variables de entorno para los dias y validacion de minimos cancelados 
+load_dotenv()
+DIAS_TURNOS_CANCELADOS = int(os.getenv("DIAS_TURNOS_CANCELADOS", 180))
+MIN_CANCELADOS = int(os.getenv("MIN_CANCELADOS", 1))
+
 #GET /reportes/turnos-cancelados?min=int
 @app.get("/reportes/turnos-cancelados")
-def reportes_personas_con_turnos_cancelados(min: int):
+def reportes_personas_con_turnos_cancelados(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
     try:
-        limite= calcular_limite_fecha (180)
+        limite = calcular_limite_fecha (dias)
         personas = obtener_personas_con_turnos_cancelados(session, limite, min)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -550,7 +557,6 @@ def reportes_personas_estado_habilitacion(habilitada: bool):
         raise HTTPException(status_code=404,detail=str(e))
     
     return personas_por_estado
-
 
 # GET /reportes/csv/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
 @app.get("/reportes/csv/turnos-confirmados")
@@ -709,3 +715,144 @@ def csv_estado_personas(habilitada: bool):
         media_type="application/pdf",
         filename=nombre_archivo
     )
+
+#reportes csv y pdf
+#csv turnos por persona
+@app.get("/reportes/turnos-por-persona-csv/{dni}")
+def turnos_por_persona_csv(dni: int):
+    try:
+        persona = obtener_persona_por_dni(dni, session)
+        turnos_bd = obtener_turnos_por_persona(persona.id, session)
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    datos = []
+
+    for turno in turnos_bd:
+        datos.append({
+            "id_turnos": turno.id ,
+            "fecha_turno": turno.fecha ,
+            "hora_turno": turno.hora,
+            "estado": turno.estado ,
+            "id_persona": turno.id_persona
+        })
+    archivo = f"turnos_persona_{dni}.csv"
+    df = pd.DataFrame(datos)
+    df.to_csv(archivo, index=False)
+
+    return FileResponse(
+        archivo,
+        media_type="text/csv",
+        filename= archivo
+    )
+
+#csv turnos cancelados
+@app.get("/reportes/turnos-cancelados-min-csv")
+def personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
+    try:
+        limite = calcular_limite_fecha(dias)
+        personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+
+        if not personas:
+            raise HTTPException(status_code=404, detail="No hay personas con turnos cancelados.")
+
+        datos = []
+        for item in personas: 
+            persona = item["persona"]
+            for turno in item["turnos_cancelados"]:
+                datos.append({
+                    "id_persona": persona["id"],
+                    "nombre": persona["nombre"],
+                    "DNI": persona["dni"],
+                    "habilitado": persona["habilitado"],
+                    "id_turno": turno["id"],
+                    "fecha": turno["fecha"],
+                    "hora": turno["hora"].strftime("%H:%M"),
+                    "estado": turno["estado"]
+                })
+
+        archivo = f"personas_con_turnos_cancelados_min_{min}.csv"
+        df = pd.DataFrame(datos)
+        df.to_csv(archivo, index=False)
+
+        return FileResponse(
+            archivo,
+            media_type="text/csv",
+            filename= archivo
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+#pdf turnos por persona
+@app.get("/reportes/turnos-por-persona-pdf/{dni}")
+def turnos_por_persona_pdf(dni: int):
+    
+    archivo_csv = turnos_por_persona_csv(dni).filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph("Turnos de la persona con dni {}".format(dni), font_size=18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"turnos_persona_{dni}.pdf"
+    PDF.write (what=documento, where_to=archivo_pdf)
+
+    return FileResponse(
+            archivo_pdf,
+            media_type="application/pdf",
+            filename= archivo_pdf
+        )
+
+
+#pdf turnos cancelados 
+@app.get("/reportes/turnos-cancelados-min-pdf")
+def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
+    archivo_csv = personas_con_turnos_cancelados_csv(min, dias).filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph(f"Personas con minimo {min} turnos cancelados", font_size= 18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"personas_con_turnos_cancelados_min_{min}.pdf"
+    PDF.write (what=documento, where_to=archivo_pdf)
+    
+    return FileResponse(
+            archivo_pdf,
+            media_type="application/pdf",
+            filename= archivo_pdf
+        )
+
+
