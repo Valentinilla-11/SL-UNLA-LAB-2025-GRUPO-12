@@ -11,6 +11,8 @@ from fastapi import HTTPException
 import pandas as pd
 from dotenv import load_dotenv
 import os
+from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement
+
 
 
 app = FastAPI()
@@ -564,7 +566,7 @@ def turnos_por_persona_csv(dni: int):
 
 #csv turnos cancelados
 @app.get("/reportes/turnos-cancelados-min-csv")
-def exportar_personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
+def personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
     try:
         limite = calcular_limite_fecha(dias)
         personas = obtener_personas_con_turnos_cancelados(session, limite, min)
@@ -600,5 +602,74 @@ def exportar_personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias:
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+#pdf turnos por persona
+@app.get("/reportes/turnos-por-persona-pdf/{dni}")
+def turnos_por_persona_pdf(dni: int):
+    
+    archivo_csv = turnos_por_persona_csv(dni).filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph("Turnos de la persona con dni {}".format(dni), font_size=18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"turnos_persona_{dni}.pdf"
+    PDF.write (what=documento, where_to=archivo_pdf)
+
+    return FileResponse(
+            archivo_pdf,
+            media_type="application/pdf",
+            filename= archivo_pdf
+        )
+
+
+#pdf turnos cancelados 
+@app.get("/reportes/turnos-cancelados-min-pdf")
+def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
+    archivo_csv = personas_con_turnos_cancelados_csv(min, dias).filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph(f"Personas con minimo {min} turnos cancelados", font_size= 18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"personas_con_turnos_cancelados_min_{min}.pdf"
+    PDF.write (what=documento, where_to=archivo_pdf)
+    
+    return FileResponse(
+            archivo_pdf,
+            media_type="application/pdf",
+            filename= archivo_pdf
+        )
 
 
