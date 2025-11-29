@@ -4,6 +4,7 @@ Trabajo Práctico – Gestión de Turnos (API REST)
 ---
 Este proyecto corresponde al Trabajo Práctico de la materia Seminario de Lenguajes – Python (2025).
 Consiste en el desarrollo de una API REST para la gestión de turnos y personas, con operaciones ABM y generación de reportes en JSON, PDF y CSV, desarrollados de manera incremental.
+
 ---
 Equipo docente: 
 - Mg. Lic. María Alejandra Vranic
@@ -93,6 +94,7 @@ E. Endpoints de reportes - F. Reportes en PDF - G. Reportes en CSV
 ● GET /reportes/turnos-cancelados?min=5 (Morena Rios)
 ● GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD (Francisco Robles)
 ● GET /reportes/estado-personas?habilitada=true/false (Francisco Robles)
+
 ---
 Link al video: https://www.youtube.com/watch?v=AKkC4pTn2dU
 
