@@ -61,39 +61,39 @@ uvicorn main:app --reload
 
 
 A. ABM de personas
-● POST /personas (Francisco Robles)
-● GET /personas (Francisco Robles)
-● GET /personas/{id} (Francisco Robles)
-● PUT /personas/{id} (Lucio Karabetian)
-● PATCH /personas/{id} (Francisco Robles)
-● DELETE /personas/{id} (Lucio Karabetian)
+- POST /personas (Francisco Robles)
+- GET /personas (Francisco Robles)
+- GET /personas/{id} (Francisco Robles)
+- PUT /personas/{id} (Lucio Karabetian)
+- PATCH /personas/{id} (Francisco Robles)
+- DELETE /personas/{id} (Lucio Karabetian)
 
 
 B. ABM de turnos
-● POST /turno (Morena Rios)
-● GET /turnos (Morena Rios)
-● GET /turno/{id} (Morena Rios)
-● PUT /turnos/{id} (Lucio Karabetian)
-● DELETE /turnos/{id} (Lucio Karabetian)
+- POST /turno (Morena Rios)
+- GET /turnos (Morena Rios)
+- GET /turno/{id} (Morena Rios)
+- PUT /turnos/{id} (Lucio Karabetian)
+- DELETE /turnos/{id} (Lucio Karabetian)
 
 
 C. Cálculo de turnos disponibles
-● GET /turnos-disponibles?fecha=YYYY-MM-DD (Morena Rios)
+- GET /turnos-disponibles?fecha=YYYY-MM-DD (Morena Rios)
 
 
 D. Gestión de estado de turno
-● PUT /turno/{id}/cancelar (Morena Rios)
-● PUT /turno/{id}/confirmar (Morena Rios)
-● PATCH /turno/{id}/asistido (Morena Rios)
+- PUT /turno/{id}/cancelar (Morena Rios)
+- PUT /turno/{id}/confirmar (Morena Rios)
+- PATCH /turno/{id}/asistido (Morena Rios)
 
 
 E. Endpoints de reportes - F. Reportes en PDF - G. Reportes en CSV
-● GET /reportes/turnos-por-fecha?fecha=YYYY-MM-DD (Lucio Karabetian)
-● GET /reportes/turnos-cancelados-por-mes (Lucio Karabetian)
-● GET /reportes/turnos-por-persona?dni=12345678 (Morena Rios)
-● GET /reportes/turnos-cancelados?min=5 (Morena Rios)
-● GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD (Francisco Robles)
-● GET /reportes/estado-personas?habilitada=true/false (Francisco Robles)
+- GET /reportes/turnos-por-fecha?fecha=YYYY-MM-DD (Lucio Karabetian)
+- GET /reportes/turnos-cancelados-por-mes (Lucio Karabetian)
+- GET /reportes/turnos-por-persona?dni=12345678 (Morena Rios)
+- GET /reportes/turnos-cancelados?min=5 (Morena Rios)
+- GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD (Francisco Robles)
+- GET /reportes/estado-personas?habilitada=true/false (Francisco Robles)
 
 ---
 Link al video: https://www.youtube.com/watch?v=AKkC4pTn2dU
