@@ -3,6 +3,8 @@ import json
 from estadoEnum import EstadoEnum
 from models import PersonaOut, TurnoOut
 from database import PersonaDB, Session, TurnoDB 
+from dotenv import load_dotenv
+import os
 
 def calcular_edad(fecha_nacimiento: date) -> int:
     hoy = date.today()
@@ -91,19 +93,18 @@ def calcular_limite_fecha(dias: int):
     limite_fecha = datetime.now() - timedelta(days=dias)
     return limite_fecha
 
-def obtener_personas_con_turnos_cancelados(session: Session, limite_fecha: datetime, min_cancelados: int = 5):
+def obtener_personas_con_turnos_cancelados(session: Session, limite, min_cancelados):
     personas_bd = session.query(PersonaDB).all()
-
     if not personas_bd:
-        raise Exception("No hay personas en la base de datos")
-    
+        return []
+
     personas_con_cancelados = []
 
     for persona in personas_bd:
         turnos_cancelados = session.query(TurnoDB).filter(
             TurnoDB.id_persona == persona.id,
             TurnoDB.estado == EstadoEnum.CANCELADO,
-            TurnoDB.fecha >= limite_fecha
+            TurnoDB.fecha >= limite
         ).all()
 
         if len(turnos_cancelados) >= min_cancelados:
@@ -125,11 +126,11 @@ def obtener_personas_con_turnos_cancelados(session: Session, limite_fecha: datet
                         "fecha": turno.fecha,
                         "hora": turno.hora,
                         "estado": turno.estado
-                    }
-                    for turno in turnos_cancelados
+                    } for turno in turnos_cancelados
                 ]
             })
     return personas_con_cancelados
+
 def obtener_turnos_entre_fechas(fechaDesde: date, fechaHasta: date, session: Session):
     
     turnos_confirmados = session.query(TurnoDB).filter(

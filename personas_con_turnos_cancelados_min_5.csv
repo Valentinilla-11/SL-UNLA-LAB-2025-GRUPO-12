@@ -1,7 +1,0 @@
-ID Persona,Nombre,Email,DNI,Teléfono,Fecha de Nacimiento,Edad,Habilitado,ID Turno Cancelado,Fecha Turno Cancelado,Hora Turno Cancelado,Estado Turno Cancelado
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,3,2025-11-05,16:30,CANCELADO
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,4,2025-11-06,16:30,CANCELADO
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,5,2025-11-06,16:00,CANCELADO
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,6,2025-11-01,16:00,CANCELADO
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,7,2025-11-30,16:00,CANCELADO
-3,Morena Rios,morerios@gmail.com,46873097,1131577235,2005-06-30,20,False,8,2025-11-12,16:00,CANCELADO

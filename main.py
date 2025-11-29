@@ -9,6 +9,8 @@ from sqlalchemy import extract
 from estadoEnum import EstadoEnum
 from fastapi import HTTPException
 import pandas as pd
+from dotenv import load_dotenv
+import os
 
 
 app = FastAPI()
@@ -430,19 +432,22 @@ def reportes_turnos_por_persona(dni: int):
         turnos=turnos
     )
 
+#uso las variables de entorno para los dias y validacion de minimos cancelados 
+load_dotenv()
+DIAS_TURNOS_CANCELADOS = int(os.getenv("DIAS_TURNOS_CANCELADOS", 180))
+MIN_CANCELADOS = int(os.getenv("MIN_CANCELADOS", 1))
 #GET /reportes/turnos-cancelados?min=int
 @app.get("/reportes/turnos-cancelados")
-def reportes_personas_con_turnos_cancelados(min: int):
+def reportes_personas_con_turnos_cancelados(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
     try:
-        limite= calcular_limite_fecha (180)
+        limite = calcular_limite_fecha (dias)
         personas = obtener_personas_con_turnos_cancelados(session, limite, min)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
     
     return{
-       "Cantidad_con_cancelados": len(personas),
+        "Cantidad_con_cancelados": len(personas),
         "Personas": personas
-
     }
 
 @app.get("/reportes/turnos-por-fecha", response_model=list[TurnoConPersonaOut])
@@ -526,66 +531,74 @@ def reportes_personas_estado_habilitacion(habilitada: bool):
     
     return personas_por_estado
 
+#reportes csv y pdf
+#csv turnos por persona
 @app.get("/reportes/turnos-por-persona-csv/{dni}")
-def exportar_turnos_por_persona_csv(dni: int):
+def turnos_por_persona_csv(dni: int):
     try:
         persona = obtener_persona_por_dni(dni, session)
         turnos_bd = obtener_turnos_por_persona(persona.id, session)
 
-        if not turnos_bd:
-            raise Exception("La persona no tiene turnos registrados.")
-        # Crear DataFrame   
-        datos = []
-        for turno in turnos_bd:
-            datos.append({
-                "ID Turno ": turno.id ,
-                "Fecha ": turno.fecha ,
-                "Hora ": turno.hora.strftime("%H:%M") ,
-                "Estado ": turno.estado ,
-                "ID Persona ": turno.id_persona
-            })
-        df = pd.DataFrame(datos)
-        # Exportar a CSV
-        nombre_archivo = f"turnos_persona_{dni}.csv"
-        df.to_csv(nombre_archivo, index=False)
-
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    return {"mensaje": f"Archivo {nombre_archivo} creado exitosamente."}
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    datos = []
 
+    for turno in turnos_bd:
+        datos.append({
+            "id_turnos": turno.id ,
+            "fecha_turno": turno.fecha ,
+            "hora_turno": turno.hora,
+            "estado": turno.estado ,
+            "id_persona": turno.id_persona
+        })
+    archivo = f"turnos_persona_{dni}.csv"
+    df = pd.DataFrame(datos)
+    df.to_csv(archivo, index=False)
 
+    return FileResponse(
+        archivo,
+        media_type="text/csv",
+        filename= archivo
+    )
+
+#csv turnos cancelados
 @app.get("/reportes/turnos-cancelados-min-csv")
-def exportar_personas_con_turnos_cancelados_csv(min: int):
+def exportar_personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
     try:
-        personas = reportes_personas_con_turnos_cancelados(min)
-        if not personas["Personas"]:
-            raise Exception("No hay personas con la cantidad mínima de turnos cancelados.")
-        # Crear DataFrame
+        limite = calcular_limite_fecha(dias)
+        personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+
+        if not personas:
+            raise HTTPException(status_code=404, detail="No hay personas con turnos cancelados.")
+
         datos = []
-        for item in personas["Personas"]:
+        for item in personas: 
             persona = item["persona"]
             for turno in item["turnos_cancelados"]:
                 datos.append({
-                    "ID Persona": persona["id"],
-                    "Nombre": persona["nombre"],
-                    "Email": persona["email"],
+                    "id_persona": persona["id"],
+                    "nombre": persona["nombre"],
                     "DNI": persona["dni"],
-                    "Teléfono": persona["telefono"],
-                    "Fecha de Nacimiento": persona["fecha_nacimiento"],
-                    "Edad": persona["edad"],
-                    "Habilitado": persona["habilitado"],
-                    "ID Turno Cancelado": turno["id"],
-                    "Fecha Turno Cancelado": turno["fecha"],
-                    "Hora Turno Cancelado": turno["hora"].strftime("%H:%M"),
-                    "Estado Turno Cancelado": turno["estado"]
+                    "habilitado": persona["habilitado"],
+                    "id_turno": turno["id"],
+                    "fecha": turno["fecha"],
+                    "hora": turno["hora"].strftime("%H:%M"),
+                    "estado": turno["estado"]
                 })
-        df = pd.DataFrame(datos)
-        # Exportar a CSV
-        nombre_archivo = f"personas_con_turnos_cancelados_min_{min}.csv"
 
-        df.to_csv(nombre_archivo, index=False)
+        archivo = f"personas_con_turnos_cancelados_min_{min}.csv"
+        df = pd.DataFrame(datos)
+        df.to_csv(archivo, index=False)
+
+        return FileResponse(
+            archivo,
+            media_type="text/csv",
+            filename= archivo
+        )
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    return {"mensaje": f"Archivo {nombre_archivo} creado exitosamente."}
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 
