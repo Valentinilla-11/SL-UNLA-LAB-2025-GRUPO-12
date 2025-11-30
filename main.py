@@ -20,6 +20,11 @@ from borb.pdf import Document, Page, SingleColumnLayout, Paragraph, PDF, FixedCo
 app = FastAPI()
 
 load_dotenv()
+#uso las variables de entorno para los dias y validacion de minimos cancelados 
+DIAS_TURNOS_CANCELADOS = int(os.getenv("DIAS_TURNOS_CANCELADOS", 180))
+MIN_CANCELADOS = int(os.getenv("MIN_CANCELADOS", 1))
+#variable de entorno para paginacion
+REGISTROS_POR_PAGINA = int(os.getenv("REGISTROS_POR_PAGINA", 5))
 
 @app.get("/")
 async def root():
@@ -406,62 +411,82 @@ def actualizar_estado_turno_asistido(id: int):
         raise HTTPException(status_code=400, detail= str(e))
     return turno
 
-#Punto E 
-#Reportes por persona con el dni
-@app.get("/reportes/turnos-por-persona/{dni}", response_model=PersonaConTurnosOut)
-def reportes_turnos_por_persona(dni: int):
-    try:
-        persona = obtener_persona_por_dni (dni, session)
-        turnos_bd = obtener_turnos_por_persona (persona.id, session)
 
-        turnos: list[TurnoOut] = [
-            TurnoOut(
-                id=turno.id,
-                fecha=turno.fecha,
-                hora=turno.hora,
-                estado=turno.estado,
-                id_persona=turno.id_persona
-            )
+#Punto E REPORTES
+
+@app.get("/reportes/turnos-por-persona/{dni}")
+def reportes_turnos_por_persona( dni: int, pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+    try:
+        persona = obtener_persona_por_dni(dni, session)
+        turnos_bd = obtener_turnos_por_persona(persona.id, session)
+
+        turnos = [
+            {
+                "id": turno.id,
+                "fecha": turno.fecha,
+                "hora": turno.hora,
+                "estado": turno.estado,
+                "id_persona": turno.id_persona
+            }
             for turno in turnos_bd
         ]
 
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) 
-    
-    return PersonaConTurnosOut(
-        id=persona.id,
-        nombre=persona.nombre,
-        dni=str(persona.dni), 
-        fecha_nacimiento=persona.fecha_nacimiento,
-        edad=calcular_edad(persona.fecha_nacimiento),
-        habilitado=persona.habilitado,
-        turnos=turnos
-    )
+        paginas = ceil(len(turnos) / cant_por_pag) if len(turnos) else 1
+        inicio = (pagina - 1) * cant_por_pag
+        fin = inicio + cant_por_pag
+        turnos_paginados = turnos[inicio:fin]
 
-#uso las variables de entorno para los dias y validacion de minimos cancelados 
-load_dotenv()
-DIAS_TURNOS_CANCELADOS = int(os.getenv("DIAS_TURNOS_CANCELADOS", 180))
-MIN_CANCELADOS = int(os.getenv("MIN_CANCELADOS", 1))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {
+        "paginado": {
+            "pagina": pagina,
+            "cantidad_turnos_pag": cant_por_pag,
+            "total_turnos": len(turnos),
+            "total_paginas": paginas
+        },
+        "persona": {
+            "id": persona.id,
+            "nombre": persona.nombre,
+            "dni": str(persona.dni),
+            "fecha_nacimiento": persona.fecha_nacimiento,
+            "edad": calcular_edad(persona.fecha_nacimiento),
+            "habilitado": persona.habilitado
+        },
+
+        "turnos": turnos_paginados
+    }
 
 #GET /reportes/turnos-cancelados?min=int
 @app.get("/reportes/turnos-cancelados")
-def reportes_personas_con_turnos_cancelados(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
-    try:
-        limite = calcular_limite_fecha (dias)
-        personas = obtener_personas_con_turnos_cancelados(session, limite, min)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    
-    return{
-        "Cantidad_con_cancelados": len(personas),
-        "Personas": personas
+def reportes_personas_con_turnos_cancelados(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS, pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+
+    limite = calcular_limite_fecha(dias)
+    personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+
+    #Aplico la paginacion sobre las personas, no sobre los turnos 
+
+    paginas = ceil(len(personas) / cant_por_pag) if len(personas) else 1
+    inicio = (pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    personas_paginadas = personas[inicio:fin]
+
+    return {
+        "paginado": {
+            "pagina": pagina,
+            "cant_personas_pagina": cant_por_pag,
+            "total_personas": len(personas),
+            "total_paginas": paginas
+        },
+        "personas": personas_paginadas
     }
 
-@app.get("/reportes/turnos-por-fecha", response_model=list[TurnoConPersonaOut])
-def turnos_por_fecha(fecha: date):
+
+@app.get("/reportes/turnos-por-fecha")
+def turnos_por_fecha(fecha: date, pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+
     turnos = session.query(TurnoDB).join(PersonaDB).filter(TurnoDB.fecha == fecha).all()
-
-
 
     resultado = []
     for turno in turnos:
@@ -482,12 +507,26 @@ def turnos_por_fecha(fecha: date):
                 persona=persona_out
             )
         )
+    
+    paginas = ceil(len(resultado) / cant_por_pag) if len(resultado) else 1
+    inicio = (pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    resultado_paginado = resultado[inicio:fin]
+
     if not resultado:
         raise HTTPException(status_code=404, detail="No hay Turnos cargados para esa fecha.")
-    return resultado
+    return {
+        "paginado": {
+            "pagina": pagina,
+            "cant_turnos_pagina": cant_por_pag,
+            "total_turnos": len(resultado),
+            "total_paginas": paginas
+        },
+        "turnos": resultado_paginado
+    }
 
 @app.get("/reportes/turnos-cancelados-por-mes")
-def turnos_cancelados_por_mes():
+def turnos_cancelados_por_mes(pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
     hoy = datetime.today()
     mes_actual = hoy.month
     anio_actual = hoy.year
@@ -513,9 +552,23 @@ def turnos_cancelados_por_mes():
             "hora": turno.hora.strftime("%H:%M"),
             "estado": turno.estado
         })
+
+    paginas = ceil(len(resultado) / cant_por_pag) if len(resultado) else 1
+    inicio = (pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    turnos_paginados = resultado ["turnos"] [inicio:fin]
+
     if not resultado:
         raise HTTPException(status_code=404, detail="No hay Turnos cancelados para ese mes.")
-    return resultado
+    return {
+        "paginado": {
+            "pagina": pagina,
+            "cant_turnos_pagina": cant_por_pag,
+            "total_turnos": len(resultado["turnos"]),
+            "total_paginas": paginas
+        },
+        "turnos": turnos_paginados
+    }
 
 # GET /reportes/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
 @app.get("/reportes/turnos-confirmados")
@@ -550,14 +603,28 @@ def reportes_turnos_entre_fechas(
 
 # GET /reportes/estado-personas?habilitada=true/false
 @app.get("/reportes/estado-personas")
-def reportes_personas_estado_habilitacion(habilitada: bool):
+def reportes_personas_estado_habilitacion(habilitada: bool, pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
     try:
         personas_por_estado = obtener_personas_por_estado(habilitada, session)
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
     
-    return personas_por_estado
-
+    paginas = ceil(len(personas_por_estado) / cant_por_pag) if len(personas_por_estado) else 1
+    inicio = (pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    personas_paginadas = personas_por_estado[inicio:fin]
+    
+    return {
+        "paginado": {
+            "pagina": pagina,
+            "cant_personas_pagina": cant_por_pag,
+            "total_personas": len(personas_por_estado),
+            "total_paginas": paginas
+        },
+        "personas": personas_paginadas
+    }
+    
+#Punto f y g Reportes csv y pdf
 # GET /reportes/csv/turnos-confirmados?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
 @app.get("/reportes/csv/turnos-confirmados")
 def csv_turnos_confirmados(desde: date, hasta: date):
@@ -716,7 +783,7 @@ def csv_estado_personas(habilitada: bool):
         filename=nombre_archivo
     )
 
-#reportes csv y pdf
+
 #csv turnos por persona
 @app.get("/reportes/turnos-por-persona-csv/{dni}")
 def turnos_por_persona_csv(dni: int):
