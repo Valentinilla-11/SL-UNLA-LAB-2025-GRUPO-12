@@ -922,4 +922,140 @@ def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DI
             filename= archivo_pdf
         )
 
+@app.get("/reportes/turnos-por-fecha-csv/{fecha}")
+def turnos_por_fecha_csv(fecha: date):
+    try:
+        turnos_bd = session.query(TurnoDB).join(PersonaDB).filter(TurnoDB.fecha == fecha).all()
+        if not turnos_bd:
+            raise Exception("No hay turnos para esa fecha")
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
+    datos = []
+    for turno in turnos_bd:
+        persona = turno.persona
+        datos.append({
+            "id_turno": turno.id,
+            "fecha_turno": turno.fecha,
+            "hora_turno": turno.hora,
+            "estado": turno.estado,
+            "nombre": persona.nombre,
+            "dni": persona.dni
+        })
+
+    archivo = f"turnos_fecha_{fecha}.csv"
+    df = pd.DataFrame(datos)
+    df.to_csv(archivo, index=False)
+
+    return FileResponse(
+        archivo,
+        media_type="text/csv",
+        filename=archivo
+    )
+
+@app.get("/reportes/turnos-por-fecha-pdf/{fecha}")
+def turnos_por_fecha_pdf(fecha: date):
+    archivo_csv = turnos_por_fecha_csv(fecha).filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph(f"Turnos del día {fecha}", font_size=18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"turnos_fecha_{fecha}.pdf"
+    PDF.write(what=documento, where_to=archivo_pdf)
+
+    return FileResponse(
+        archivo_pdf,
+        media_type="application/pdf",
+        filename=archivo_pdf
+    )
+
+@app.get("/reportes/turnos-cancelados-por-mes-csv")
+def turnos_cancelados_por_mes_csv():
+    hoy = datetime.today()
+    mes_actual = hoy.month
+    anio_actual = hoy.year
+
+    try:
+        turnos_bd = session.query(TurnoDB).filter(
+            TurnoDB.estado == "CANCELADO",
+            extract("month", TurnoDB.fecha) == mes_actual,
+            extract("year", TurnoDB.fecha) == anio_actual
+        ).all()
+        if not turnos_bd:
+            raise Exception("No hay turnos cancelados para este mes")
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    datos = []
+    for turno in turnos_bd:
+        datos.append({
+            "id_turno": turno.id,
+            "fecha_turno": turno.fecha,
+            "hora_turno": turno.hora.strftime("%H:%M"),
+            "estado": turno.estado,
+            "id_persona": turno.id_persona
+        })
+
+    archivo = f"turnos_cancelados_{anio_actual}_{mes_actual}.csv"
+    df = pd.DataFrame(datos)
+    df.to_csv(archivo, index=False)
+
+    return FileResponse(
+        archivo,
+        media_type="text/csv",
+        filename=archivo
+    )
+
+@app.get("/reportes/turnos-cancelados-por-mes-pdf")
+def turnos_cancelados_por_mes_pdf():
+    hoy = datetime.today()
+    mes_actual = hoy.month
+    anio_actual = hoy.year
+
+    archivo_csv = turnos_cancelados_por_mes_csv().filename
+    df = pd.read_csv(archivo_csv)
+
+    documento = Document()
+    pagina = Page()
+    documento.append_page(pagina)
+    disenio: PageLayout = SingleColumnLayout(pagina)
+
+    titulo = Paragraph(f"Turnos cancelados - {mes_actual}/{anio_actual}", font_size=18)
+    disenio.append_layout_element(titulo)
+
+    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+
+    for columna in df.columns:
+        tabla.append_layout_element(Paragraph(columna.capitalize()))
+
+    for _, fila in df.iterrows():
+        for valor in fila:
+            tabla.append_layout_element(Paragraph(str(valor)))
+
+    disenio.append_layout_element(tabla)
+
+    archivo_pdf = f"turnos_cancelados_{anio_actual}_{mes_actual}.pdf"
+    PDF.write(what=documento, where_to=archivo_pdf)
+
+    return FileResponse(
+        archivo_pdf,
+        media_type="application/pdf",
+        filename=archivo_pdf
+    )
