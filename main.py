@@ -871,6 +871,7 @@ def turnos_por_persona_pdf(dni: int, num_pagina: int = 1, cant_por_pag: int = RE
             "estado": turno.estado ,
         })
 
+    #paginado 
     paginas = ceil(len(turnos_bd) / cant_por_pag) if len(turnos_bd) else 1
     inicio = (num_pagina - 1) * cant_por_pag
     fin = inicio + cant_por_pag
@@ -906,6 +907,7 @@ def turnos_por_persona_pdf(dni: int, num_pagina: int = 1, cant_por_pag: int = RE
 
     disenio.append_layout_element(tabla)
 
+    #info de la paginacion
     disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de turnos por pagina {cant_por_pag}  | Total de turnos {len(turnos_bd)} | Cantidad de paginas {paginas}", font_size=14))
     
     archivo_pdf = f"turnos_persona_{dni}.pdf"
@@ -945,6 +947,7 @@ def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DI
                 "estado": turno["estado"]
             })
 
+    #paginado 
     paginas = ceil(len(personas) / cant_por_pag) if len(personas) else 1
     inicio = (num_pagina - 1) * cant_por_pag
     fin = inicio + cant_por_pag
@@ -959,10 +962,10 @@ def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DI
     titulo = Paragraph("Reporte de personas con turnos cancelados", font_size=18)
     disenio.append_layout_element(titulo)
 
-    #Uso flexible para que se adapte a los datos
+    #uso flexible para que se adapte a los datos
     tabla = FlexibleColumnWidthTable(number_of_columns=6, number_of_rows=len(personas_paginadas)+1)
         
-    # Encabezados 
+    # encabezados 
     columnas = ["Nombre", "DNI", "Habilitado", "Fecha", "Hora", "Estado"]
     for col in columnas:
         #agrego color al fondo del encabezado nada mas
@@ -981,6 +984,7 @@ def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DI
     
     disenio.append_layout_element(tabla)
 
+    #info de la paginacion 
     disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de personas por pagina {cant_por_pag} | Total de personas mas de {min} turnos cancelados {len(personas)} | Cantidad de paginas {paginas}", font_size=14))
     archivo_pdf = f"personas_con_turnos_cancelados_min_{min}.pdf"
     
@@ -1013,7 +1017,6 @@ def turnos_por_fecha_csv(fecha: date):
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-    # Construcción de datos
     datos = []
     for turno in turnos_bd:
         persona = turno.persona
@@ -1026,12 +1029,10 @@ def turnos_por_fecha_csv(fecha: date):
             "dni": persona.dni
         })
 
-    # Crear CSV
     archivo = f"turnos_fecha_{fecha}.csv"
     df = pd.DataFrame(datos)
     df.to_csv(archivo, index=False)
 
-    # Enviar CSV
     return FileResponse(
         archivo,
         media_type="text/csv",
