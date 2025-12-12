@@ -1,21 +1,21 @@
 from datetime import datetime, timedelta, date
+from io import BytesIO
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import *
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import extract
+from sqlalchemy import Table, extract
 from estadoEnum import EstadoEnum
 from fastapi import HTTPException, Query
 from math import ceil
 from dotenv import load_dotenv
-from fastapi.responses import FileResponse
 import pandas as pd
-from dotenv import load_dotenv
 import os
-from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement
-from borb.pdf import Document, Page, SingleColumnLayout, Paragraph, PDF, FixedColumnWidthTable
+from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement, X11Color, HexColor, Table, FlexibleColumnWidthTable
+#from borb.pdf.canvas.layout.alignment.alignment import Alignment
+from borb.pdf.layout_element.layout_element import LayoutElement
 
 app = FastAPI()
 
@@ -854,104 +854,190 @@ def personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DI
 
 #pdf turnos por persona
 @app.get("/reportes/turnos-por-persona-pdf/{dni}")
-def turnos_por_persona_pdf(dni: int):
-    
-    archivo_csv = turnos_por_persona_csv(dni).filename
-    df = pd.read_csv(archivo_csv)
+def turnos_por_persona_pdf(dni: int, num_pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+    try:
+        persona = obtener_persona_por_dni(dni, session)
+        turnos_bd = obtener_turnos_por_persona(persona.id, session)
 
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    datos = []
+
+    for turno in turnos_bd:
+        datos.append({
+            "fecha_turno": turno.fecha ,
+            "hora_turno": turno.hora,
+            "estado": turno.estado ,
+        })
+
+    paginas = ceil(len(turnos_bd) / cant_por_pag) if len(turnos_bd) else 1
+    inicio = (num_pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    turnos_paginados = turnos_bd[inicio:fin]
+    
     documento = Document()
     pagina = Page()
     documento.append_page(pagina)
+
     disenio: PageLayout = SingleColumnLayout(pagina)
 
-    titulo = Paragraph("Turnos de la persona con dni {}".format(dni), font_size=18)
+    titulo = Paragraph("Reporte de turnos por persona", font_size=18)
     disenio.append_layout_element(titulo)
 
-    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+    datos_persona = Paragraph(f"Nombre: {persona.nombre} | DNI: {persona.dni}", font_size=14)
+    disenio.append_layout_element(datos_persona)
 
-    for columna in df.columns:
-        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    tabla = FixedColumnWidthTable(number_of_columns=3, number_of_rows=len(turnos_paginados)+1)
 
-    for _, fila in df.iterrows():
-        for valor in fila:
-            tabla.append_layout_element(Paragraph(str(valor)))
+    #encabezados de columnas
+    columnas = ["Fecha", "Hora", "Estado"]
+    for col in columnas:
+        #agrego color al fondo de los encabezados nada mas
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
+
+    for fila in turnos_paginados:
+        tabla.append_layout_element(Paragraph(str(fila.fecha)))
+        tabla.append_layout_element(Paragraph(str(fila.hora)))
+        tabla.append_layout_element(Paragraph(str(fila.estado)))
+
+    #agrega espacios para que la tabla quede mas prolija
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
 
     disenio.append_layout_element(tabla)
 
+    disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de turnos por pagina {cant_por_pag}  | Total de turnos {len(turnos_bd)} | Cantidad de paginas {paginas}", font_size=14))
+    
     archivo_pdf = f"turnos_persona_{dni}.pdf"
-    PDF.write (what=documento, where_to=archivo_pdf)
+    
+    #guardo el pdf en memoria para poder usar el StreamingResponse
+    pdf_memoria = BytesIO()
+    PDF.write(documento, pdf_memoria)
+    pdf_memoria.seek(0)
 
-    return FileResponse(
-            archivo_pdf,
-            media_type="application/pdf",
-            filename= archivo_pdf
-        )
-
+    # devuelvo el pdf como respuesta sin guardarlo en disco directamente
+    return StreamingResponse(
+        pdf_memoria,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename=turnos_persona_{dni}.pdf"}
+    )
 
 #pdf turnos cancelados 
 @app.get("/reportes/turnos-cancelados-min-pdf")
-def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS):
-    archivo_csv = personas_con_turnos_cancelados_csv(min, dias).filename
-    df = pd.read_csv(archivo_csv)
+def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS, num_pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+    try:
+        limite = calcular_limite_fecha(dias)
+        personas = obtener_personas_con_turnos_cancelados(session, limite, min)
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    datos = []
+    for item in personas: 
+        persona = item["persona"]
+        for turno in item["turnos_cancelados"]:
+            datos.append({
+                "nombre": persona["nombre"],
+                "DNI": persona["dni"],
+                "habilitado": persona["habilitado"],
+                "fecha": turno["fecha"],
+                "hora": turno["hora"].strftime("%H:%M"),
+                "estado": turno["estado"]
+            })
+
+    paginas = ceil(len(personas) / cant_por_pag) if len(personas) else 1
+    inicio = (num_pagina - 1) * cant_por_pag
+    fin = inicio + cant_por_pag
+    personas_paginadas = datos[inicio:fin]
 
     documento = Document()
     pagina = Page()
     documento.append_page(pagina)
+
     disenio: PageLayout = SingleColumnLayout(pagina)
 
-    titulo = Paragraph(f"Personas con minimo {min} turnos cancelados", font_size= 18)
+    titulo = Paragraph("Reporte de personas con turnos cancelados", font_size=18)
     disenio.append_layout_element(titulo)
 
-    tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
+    #Uso flexible para que se adapte a los datos
+    tabla = FlexibleColumnWidthTable(number_of_columns=6, number_of_rows=len(personas_paginadas)+1)
+        
+    # Encabezados 
+    columnas = ["Nombre", "DNI", "Habilitado", "Fecha", "Hora", "Estado"]
+    for col in columnas:
+        #agrego color al fondo del encabezado nada mas
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
-    for columna in df.columns:
-        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    for fila in personas_paginadas:
+        tabla.append_layout_element(Paragraph(fila["nombre"]))
+        tabla.append_layout_element(Paragraph(fila["DNI"]))
+        tabla.append_layout_element(Paragraph(str(fila["habilitado"])))
+        tabla.append_layout_element(Paragraph(str(fila["fecha"])))
+        tabla.append_layout_element(Paragraph(str(fila["hora"])))
+        tabla.append_layout_element(Paragraph(str(fila["estado"])))
+
+    #agrega espacios para que la tabla quede mas prolija
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
     
-    for _, fila in df.iterrows():
-        for valor in fila:
-            tabla.append_layout_element(Paragraph(str(valor)))
-
     disenio.append_layout_element(tabla)
 
+    disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de personas por pagina {cant_por_pag} | Total de personas mas de {min} turnos cancelados {len(personas)} | Cantidad de paginas {paginas}", font_size=14))
     archivo_pdf = f"personas_con_turnos_cancelados_min_{min}.pdf"
-    PDF.write (what=documento, where_to=archivo_pdf)
     
-    return FileResponse(
-            archivo_pdf,
-            media_type="application/pdf",
-            filename= archivo_pdf
-        )
+    #guardo el pdf en memoria para poder usar el StreamingResponse
+    pdf_memoria = BytesIO()
+    PDF.write(documento, pdf_memoria)
+    pdf_memoria.seek(0)
+
+    # devuelvo el pdf como respuesta sin guardarlo en disco directamente
+    return StreamingResponse(
+        pdf_memoria,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename=personas_con_turnos_cancelados_min_{min}.pdf"}
+    )
+
 
 @app.get("/reportes/turnos-por-fecha-csv/{fecha}")
 def turnos_por_fecha_csv(fecha: date):
     try:
-        turnos_bd = session.query(TurnoDB).join(PersonaDB).filter(TurnoDB.fecha == fecha).all()
+        turnos_bd = (
+            session.query(TurnoDB)
+            .join(PersonaDB)
+            .filter(TurnoDB.fecha == fecha)
+            .all()
+        )
+
         if not turnos_bd:
             raise Exception("No hay turnos para esa fecha")
+
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+    # Construcción de datos
     datos = []
     for turno in turnos_bd:
         persona = turno.persona
         datos.append({
             "id_turno": turno.id,
             "fecha_turno": turno.fecha,
-            "hora_turno": turno.hora,
+            "hora_turno": turno.hora.strftime("%H:%M") if turno.hora else "",
             "estado": turno.estado,
             "nombre": persona.nombre,
             "dni": persona.dni
         })
 
+    # Crear CSV
     archivo = f"turnos_fecha_{fecha}.csv"
     df = pd.DataFrame(datos)
     df.to_csv(archivo, index=False)
 
+    # Enviar CSV
     return FileResponse(
         archivo,
         media_type="text/csv",
         filename=archivo
     )
+
 
 @app.get("/reportes/turnos-por-fecha-pdf/{fecha}")
 def turnos_por_fecha_pdf(fecha: date):

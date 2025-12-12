@@ -45,7 +45,7 @@ source .venv/bin/activate
 ```
 3. Instalar dependencias
 ```bash
-pip install -r requeriments.txt
+pip install -r requirements.txt
 ```
 4. Ejecutar la API
 ```bash
