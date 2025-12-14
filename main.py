@@ -638,7 +638,6 @@ def csv_turnos_confirmados(desde: date, hasta: date):
     for persona in personas_con_turnos:
         for turno in persona.turnos:
             filas.append({
-                "turno_id": turno.id,
                 "fecha_turno": turno.fecha,
                 "hora_turno": turno.hora,
                 "estado": turno.estado,
@@ -697,7 +696,6 @@ def pdf_turnos_confirmados(desde: date, hasta: date):
     for persona in personas_con_turnos:
         for turno in persona.turnos:
             filas.append({
-                "turno_id": turno.id,
                 "fecha_turno": turno.fecha,
                 "hora_turno": turno.hora,
                 "estado": turno.estado,
@@ -712,18 +710,27 @@ def pdf_turnos_confirmados(desde: date, hasta: date):
     doc.append_page(page)
     layout = SingleColumnLayout(page)
 
+    titulo = Paragraph("Reporte de TODOS los turnos confirmados", font_size=18)
+    layout.append_layout_element(titulo)
+
     tabla = FixedColumnWidthTable(
         number_of_rows= len(df) + 1,
         number_of_columns= len(df.columns)
     )
 
-    for col in df.columns:
-        tabla.append_layout_element(Paragraph(col.capitalize()))
+    columnas = ["FECHA", "HORA", "ESTADO", "PACIENTE", "DNI"]
+    for col in columnas:
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
-    for _, row in df.iterrows():
-        for value in row:
-            tabla.append_layout_element(Paragraph(str(value)))
+    for fila in filas:
+        tabla.append_layout_element(Paragraph(str(fila["fecha_turno"])))
+        tabla.append_layout_element(Paragraph(str(fila["hora_turno"])))
+        tabla.append_layout_element(Paragraph(str(fila["estado"])))
+        tabla.append_layout_element(Paragraph(str(fila["persona"])))
+        tabla.append_layout_element(Paragraph(str(fila["dni"])))
 
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
+    
     layout.append_layout_element(tabla)
 
     nombre_archivo = "turnos_confirmados_por_fecha.pdf"
@@ -759,17 +766,23 @@ def csv_estado_personas(habilitada: bool):
     doc.append_page(page)
     layout = SingleColumnLayout(page)
 
+    titulo = Paragraph("Reporte de estados de las personas", font_size=18)
+    layout.append_layout_element(titulo)
+
     tabla = FixedColumnWidthTable(
         number_of_rows= len(df) + 1,
         number_of_columns= len(df.columns)
     )
 
-    for col in df.columns:
-        tabla.append_layout_element(Paragraph(col.capitalize()))
+    columnas = ["NOMBRE", "DNI", "HABILITADO"]
+    for col in columnas:
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
     for _, row in df.iterrows():
         for value in row:
             tabla.append_layout_element(Paragraph(str(value)))
+
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
 
     layout.append_layout_element(tabla)
 
