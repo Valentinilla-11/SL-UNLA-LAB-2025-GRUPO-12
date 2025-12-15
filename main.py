@@ -1034,7 +1034,6 @@ def turnos_por_fecha_csv(fecha: date):
     for turno in turnos_bd:
         persona = turno.persona
         datos.append({
-            "id_turno": turno.id,
             "fecha_turno": turno.fecha,
             "hora_turno": turno.hora.strftime("%H:%M") if turno.hora else "",
             "estado": turno.estado,
@@ -1068,12 +1067,16 @@ def turnos_por_fecha_pdf(fecha: date):
 
     tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
 
-    for columna in df.columns:
-        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    columnas = ["FECHA", "HORA", "ESTADO", "PACIENTE", "DNI"]
+
+    for col in columnas:
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
     for _, fila in df.iterrows():
         for valor in fila:
             tabla.append_layout_element(Paragraph(str(valor)))
+
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
 
     disenio.append_layout_element(tabla)
 
@@ -1105,12 +1108,12 @@ def turnos_cancelados_por_mes_csv():
 
     datos = []
     for turno in turnos_bd:
+        persona = session.query(PersonaDB).filter(PersonaDB.id == turno.id_persona).first()
         datos.append({
-            "id_turno": turno.id,
             "fecha_turno": turno.fecha,
             "hora_turno": turno.hora.strftime("%H:%M"),
             "estado": turno.estado,
-            "id_persona": turno.id_persona
+            "nombre": persona.nombre
         })
 
     archivo = f"turnos_cancelados_{anio_actual}_{mes_actual}.csv"
@@ -1142,12 +1145,16 @@ def turnos_cancelados_por_mes_pdf():
 
     tabla = FixedColumnWidthTable(number_of_columns=len(df.columns), number_of_rows=len(df)+1)
 
-    for columna in df.columns:
-        tabla.append_layout_element(Paragraph(columna.capitalize()))
+    columnas = ["FECHA", "HORA", "ESTADO", "PACIENTE"]
+
+    for col in columnas:
+        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
     for _, fila in df.iterrows():
         for valor in fila:
             tabla.append_layout_element(Paragraph(str(valor)))
+
+    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
 
     disenio.append_layout_element(tabla)
 
