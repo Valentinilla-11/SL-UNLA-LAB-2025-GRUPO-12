@@ -62,13 +62,6 @@ def leer_horarios_env():
     #paso a lista de time
     return [datetime.strptime(h, "%H:%M").time() for h in horarios_str.split(",")]
 
-#Leo los horarios del json
-def leer_horarios ():
-    with open ("horarios.json", "r", encoding= "utf-8") as archivo:
-        horarios = json.load (archivo)
-        horarios_posibles = horarios ["horarios"]
-        return horarios_posibles
-    
 #convierto de string a time
 def to_time (hora: str):
     hora_time = datetime.strptime(hora, "%H:%M").time()

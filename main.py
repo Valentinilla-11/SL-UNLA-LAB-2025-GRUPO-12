@@ -1,8 +1,6 @@
-from ctypes import alignment
 from datetime import datetime, timedelta, date
-from io import BytesIO
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 from models import PersonaConTurnosOut, PersonaCreate, PersonaOut, PersonaOutTurno, PersonaUpdate, TurnoOut, TurnoCreate, TurnoConPersonaOut, TurnoEstadoUpdate
 from database import session, PersonaDB, TurnoDB
 from utils import *
@@ -14,8 +12,7 @@ from math import ceil
 from dotenv import load_dotenv
 import pandas as pd
 import os
-from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement, X11Color, HexColor, Table, FlexibleColumnWidthTable
-from borb.pdf.layout_element.layout_element import LayoutElement
+from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, HexColor, Table
 
 app = FastAPI()
 
@@ -175,7 +172,6 @@ def crear_turno(turno: TurnoCreate):
 
         #verifico la hora
         lista_horarios = leer_horarios_env() #leo del .env
-        #lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
         if turno.hora not in lista_horarios :
             raise Exception ("El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora, desde las 09:00 hasta las 17:00")
         
@@ -323,7 +319,6 @@ def traer_turnos_disponibles (fecha: str):
 
     tomados_horas = [ocupado.hora for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
     horarios_disponibles = leer_horarios_env() #leo del .env
-    #horarios_disponibles = [to_time(h) for h in leer_horarios ()]
     turnos_disponibles = [horario.strftime("%H:%M") for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
