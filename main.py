@@ -1,3 +1,4 @@
+from ctypes import alignment
 from datetime import datetime, timedelta, date
 from io import BytesIO
 from fastapi import FastAPI, HTTPException, status
@@ -14,7 +15,6 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 from borb.pdf import Document, Page, Paragraph, PDF, FixedColumnWidthTable, SingleColumnLayout, PageLayout, LayoutElement, X11Color, HexColor, Table, FlexibleColumnWidthTable
-#from borb.pdf.canvas.layout.alignment.alignment import Alignment
 from borb.pdf.layout_element.layout_element import LayoutElement
 
 app = FastAPI()
@@ -25,6 +25,7 @@ DIAS_TURNOS_CANCELADOS = int(os.getenv("DIAS_TURNOS_CANCELADOS", 180))
 MIN_CANCELADOS = int(os.getenv("MIN_CANCELADOS", 1))
 #variable de entorno para paginacion
 REGISTROS_POR_PAGINA = int(os.getenv("REGISTROS_POR_PAGINA", 5))
+
 
 @app.get("/")
 async def root():
@@ -173,7 +174,8 @@ def crear_turno(turno: TurnoCreate):
         
 
         #verifico la hora
-        lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
+        lista_horarios = leer_horarios_env() #leo del .env
+        #lista_horarios = [datetime.strptime(h, "%H:%M").time() for h in leer_horarios()]#paso a time
         if turno.hora not in lista_horarios :
             raise Exception ("El horario debe estar dentro del limite horario, los horarios se organizan en intervalos de media hora, desde las 09:00 hasta las 17:00")
         
@@ -320,7 +322,8 @@ def traer_turnos_disponibles (fecha: str):
     ).all()
 
     tomados_horas = [ocupado.hora for ocupado in ocupados] #guardo las horas de los turnos que estan en la bd
-    horarios_disponibles = [to_time(h) for h in leer_horarios ()]
+    horarios_disponibles = leer_horarios_env() #leo del .env
+    #horarios_disponibles = [to_time(h) for h in leer_horarios ()]
     turnos_disponibles = [horario.strftime("%H:%M") for horario in horarios_disponibles if horario not in tomados_horas] #cargo todos los horarios disponibles, van a ser los que no esten en la lista de tomados horas
     
     return {"Fecha:": fecha, "Horarios disponibles:": turnos_disponibles} 
@@ -867,7 +870,7 @@ def personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DI
 
 #pdf turnos por persona
 @app.get("/reportes/turnos-por-persona-pdf/{dni}")
-def turnos_por_persona_pdf(dni: int, num_pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+def turnos_por_persona_pdf(dni: int, cant_por_pag: int = REGISTROS_POR_PAGINA):
     try:
         persona = obtener_persona_por_dni(dni, session)
         turnos_bd = obtener_turnos_por_persona(persona.id, session)
@@ -875,71 +878,65 @@ def turnos_por_persona_pdf(dni: int, num_pagina: int = 1, cant_por_pag: int = RE
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
     
-    datos = []
-
-    for turno in turnos_bd:
-        datos.append({
-            "fecha_turno": turno.fecha ,
-            "hora_turno": turno.hora,
-            "estado": turno.estado ,
-        })
-
-    #paginado 
-    paginas = ceil(len(turnos_bd) / cant_por_pag) if len(turnos_bd) else 1
-    inicio = (num_pagina - 1) * cant_por_pag
-    fin = inicio + cant_por_pag
-    turnos_paginados = turnos_bd[inicio:fin]
-    
+    #creo un solo documento con varias paginas
     documento = Document()
-    pagina = Page()
-    documento.append_page(pagina)
+    paginas = ceil(len(turnos_bd) / cant_por_pag) if len(turnos_bd) else 1
+    
+    #hago el for para cargar todas las paginas en el mismo documento
+    for num_pagina in range(1, paginas + 1):
+        pagina = Page()
+        documento.append_page(pagina)
 
-    disenio: PageLayout = SingleColumnLayout(pagina)
+        inicio = (num_pagina - 1) * cant_por_pag
+        fin = inicio + cant_por_pag
+        turnos_paginados = turnos_bd[inicio:fin]
 
-    titulo = Paragraph("Reporte de turnos por persona", font_size=18)
-    disenio.append_layout_element(titulo)
+        disenio: PageLayout = SingleColumnLayout(pagina)
 
-    datos_persona = Paragraph(f"Nombre: {persona.nombre} | DNI: {persona.dni}", font_size=14)
-    disenio.append_layout_element(datos_persona)
+        titulo = Paragraph("Reporte de turnos por persona", font_size=18, font="Helvetica-Bold")
+        disenio.append_layout_element(titulo)
 
-    tabla = FixedColumnWidthTable(number_of_columns=3, number_of_rows=len(turnos_paginados)+1)
+        datos_persona = Paragraph(f"Nombre: {persona.nombre} | DNI: {persona.dni}", font_size=14, font="Helvetica-Bold")
+        disenio.append_layout_element(datos_persona)
 
-    #encabezados de columnas
-    columnas = ["Fecha", "Hora", "Estado"]
-    for col in columnas:
-        #agrego color al fondo de los encabezados nada mas
-        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
+        filas = max(len(turnos_paginados), 1) + 1
 
-    for fila in turnos_paginados:
-        tabla.append_layout_element(Paragraph(str(fila.fecha)))
-        tabla.append_layout_element(Paragraph(str(fila.hora)))
-        tabla.append_layout_element(Paragraph(str(fila.estado)))
+        tabla = FixedColumnWidthTable(
+            number_of_columns=3,
+            number_of_rows= filas
+        )
+        #encabezados de columnas
+        columnas = ["Fecha", "Hora", "Estado"]
+        for col in columnas:
+            #agrego color al fondo de los encabezados nada mas
+            tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
 
-    #agrega espacios para que la tabla quede mas prolija
-    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
+        for fila in turnos_paginados:
+            tabla.append_layout_element(Paragraph(str(fila.fecha)))
+            tabla.append_layout_element(Paragraph(str(fila.hora)))
+            tabla.append_layout_element(Paragraph(str(fila.estado)))
 
-    disenio.append_layout_element(tabla)
+        #agrega espacios para que la tabla quede mas prolija
+        tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
 
-    #info de la paginacion
-    disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de turnos por pagina {cant_por_pag}  | Total de turnos {len(turnos_bd)} | Cantidad de paginas {paginas}", font_size=14))
+        disenio.append_layout_element(tabla)
+
+        #info de la paginacion
+        disenio.append_layout_element(Paragraph(f"Página {num_pagina}" , font_size=12))
+        disenio.append_layout_element(Paragraph(f"Cantidad de turnos por pagina {cant_por_pag}  | Total de turnos {len(turnos_bd)} | Cantidad de paginas {paginas}", font_size=12))
     
     archivo_pdf = f"turnos_persona_{dni}.pdf"
-    
-    #guardo el pdf en memoria para poder usar el StreamingResponse
-    pdf_memoria = BytesIO()
-    PDF.write(documento, pdf_memoria)
-    pdf_memoria.seek(0)
+    PDF.write(what=documento, where_to=archivo_pdf)
 
-    # devuelvo el pdf como respuesta sin guardarlo en disco directamente
-    return StreamingResponse(
-        pdf_memoria,
+    return FileResponse(
+        archivo_pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"inline; filename=turnos_persona_{dni}.pdf"}
+        filename= archivo_pdf
     )
 
 #pdf turnos cancelados 
 @app.get("/reportes/turnos-cancelados-min-pdf")
-def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS, num_pagina: int = 1, cant_por_pag: int = REGISTROS_POR_PAGINA):
+def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DIAS_TURNOS_CANCELADOS, cant_por_pag: int = REGISTROS_POR_PAGINA):
     try:
         limite = calcular_limite_fecha(dias)
         personas = obtener_personas_con_turnos_cancelados(session, limite, min)
@@ -947,72 +944,72 @@ def personas_con_turnos_cancelados_pdf(min: int = MIN_CANCELADOS, dias: int = DI
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-    datos = []
-    for item in personas: 
-        persona = item["persona"]
-        for turno in item["turnos_cancelados"]:
-            datos.append({
-                "nombre": persona["nombre"],
-                "DNI": persona["dni"],
-                "habilitado": persona["habilitado"],
-                "fecha": turno["fecha"],
-                "hora": turno["hora"].strftime("%H:%M"),
-                "estado": turno["estado"]
-            })
-
-    #paginado 
-    paginas = ceil(len(personas) / cant_por_pag) if len(personas) else 1
-    inicio = (num_pagina - 1) * cant_por_pag
-    fin = inicio + cant_por_pag
-    personas_paginadas = datos[inicio:fin]
-
     documento = Document()
-    pagina = Page()
-    documento.append_page(pagina)
+    paginas = ceil(len(personas) / cant_por_pag) if len(personas) else 1
 
-    disenio: PageLayout = SingleColumnLayout(pagina)
+    for num_pagina in range(1, paginas + 1):
+        pagina = Page()
+        documento.append_page(pagina)
 
-    titulo = Paragraph("Reporte de personas con turnos cancelados", font_size=18)
-    disenio.append_layout_element(titulo)
+        inicio = (num_pagina - 1) * cant_por_pag
+        fin = inicio + cant_por_pag
+        personas_paginadas = personas[inicio:fin]
 
-    #uso flexible para que se adapte a los datos
-    tabla = FlexibleColumnWidthTable(number_of_columns=6, number_of_rows=len(personas_paginadas)+1)
+        disenio: PageLayout = SingleColumnLayout(pagina)
+
+        titulo = Paragraph("Reporte de personas con turnos cancelados", font_size=18, font="Helvetica-Bold")
+        disenio.append_layout_element(titulo)
+
+        if not personas_paginadas:
+            disenio.append_layout_element(
+                Paragraph("No hay personas con turnos cancelados.", font_size=14)
+            )
+            continue
+
         
-    # encabezados 
-    columnas = ["Nombre", "DNI", "Habilitado", "Fecha", "Hora", "Estado"]
-    for col in columnas:
-        #agrego color al fondo del encabezado nada mas
-        tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB")))
+        for item in personas_paginadas:
+            persona = item["persona"]
+            turnos = item["turnos_cancelados"]
+            
+            #primero pongo los datos de la persona y despues una tabla con los turnos cancelados
+            disenio.append_layout_element(Paragraph(f"Nombre: {persona['nombre']} | DNI: {persona['dni']} | Habilitado: {persona['habilitado']}",font_size=14 , font="Helvetica-Bold"))
 
-    for fila in personas_paginadas:
-        tabla.append_layout_element(Paragraph(fila["nombre"]))
-        tabla.append_layout_element(Paragraph(fila["DNI"]))
-        tabla.append_layout_element(Paragraph(str(fila["habilitado"])))
-        tabla.append_layout_element(Paragraph(str(fila["fecha"])))
-        tabla.append_layout_element(Paragraph(str(fila["hora"])))
-        tabla.append_layout_element(Paragraph(str(fila["estado"])))
+            #si no tiuene turnos
+            if not turnos:
+                disenio.append_layout_element(Paragraph("No tiene turnos cancelados.", font_size=12))
+                continue
 
-    #agrega espacios para que la tabla quede mas prolija
-    tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
+            #tabla solo con los turnos 
+            tabla = FixedColumnWidthTable(number_of_columns=3, number_of_rows=len(turnos)+1)
+
+            #encabezados
+            for col in ["Fecha", "Hora", "Estado"]:
+                tabla.append_layout_element(Table.TableCell(Paragraph(col), background_color=HexColor("#BBDEFB"))) 
+
+            #filas
+            for turno in turnos:
+                tabla.append_layout_element(Paragraph(str(turno["fecha"])))
+                tabla.append_layout_element(Paragraph(str(turno["hora"].strftime("%H:%M"))))
+                tabla.append_layout_element(Paragraph(str(turno["estado"])))
+
+            # agrega espacios para que la tabla quede mas prolija
+            tabla.set_padding_on_all_cells(padding_bottom=3, padding_left=3, padding_right=3, padding_top=3)
+
+            disenio.append_layout_element(tabla)
+
+        #info de la paginacion
+        disenio.append_layout_element(Paragraph(f"Página {num_pagina}" , font_size=12))
+        disenio.append_layout_element(Paragraph(f"Cantidad de personas por pagina {cant_por_pag}  | Cantidad de personas {len(personas)} | Cantidad de paginas {paginas}", font_size=12))
     
-    disenio.append_layout_element(tabla)
 
-    #info de la paginacion 
-    disenio.append_layout_element(Paragraph(f"Página {num_pagina} | Cantidad de personas por pagina {cant_por_pag} | Total de personas mas de {min} turnos cancelados {len(personas)} | Cantidad de paginas {paginas}", font_size=14))
     archivo_pdf = f"personas_con_turnos_cancelados_min_{min}.pdf"
-    
-    #guardo el pdf en memoria para poder usar el StreamingResponse
-    pdf_memoria = BytesIO()
-    PDF.write(documento, pdf_memoria)
-    pdf_memoria.seek(0)
+    PDF.write(what=documento, where_to=archivo_pdf)
 
-    # devuelvo el pdf como respuesta sin guardarlo en disco directamente
-    return StreamingResponse(
-        pdf_memoria,
+    return FileResponse(
+        archivo_pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"inline; filename=personas_con_turnos_cancelados_min_{min}.pdf"}
+        filename= archivo_pdf
     )
-
 
 @app.get("/reportes/turnos-por-fecha-csv/{fecha}")
 def turnos_por_fecha_csv(fecha: date):

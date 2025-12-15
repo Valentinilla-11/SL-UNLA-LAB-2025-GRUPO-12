@@ -7,6 +7,8 @@ from typing import List
 from dotenv import load_dotenv
 import os
 
+
+
 def calcular_edad(fecha_nacimiento: date) -> int:
     hoy = date.today()
     edad = hoy.year - fecha_nacimiento.year
@@ -52,6 +54,13 @@ def persona_habilitada(persona: PersonaDB, session: Session):
     session.commit()
     session.refresh(persona)
     return persona.habilitado
+
+load_dotenv()
+#Leo los horarios del .env
+def leer_horarios_env():
+    horarios_str = os.getenv("HORARIOS")
+    #paso a lista de time
+    return [datetime.strptime(h, "%H:%M").time() for h in horarios_str.split(",")]
 
 #Leo los horarios del json
 def leer_horarios ():
