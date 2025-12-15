@@ -814,11 +814,10 @@ def turnos_por_persona_csv(dni: int):
 
     for turno in turnos_bd:
         datos.append({
-            "id_turnos": turno.id ,
             "fecha_turno": turno.fecha ,
             "hora_turno": turno.hora,
             "estado": turno.estado ,
-            "id_persona": turno.id_persona
+            "persona": persona.nombre,
         })
     archivo = f"turnos_persona_{dni}.csv"
     df = pd.DataFrame(datos)
@@ -845,11 +844,9 @@ def personas_con_turnos_cancelados_csv(min: int = MIN_CANCELADOS, dias: int = DI
             persona = item["persona"]
             for turno in item["turnos_cancelados"]:
                 datos.append({
-                    "id_persona": persona["id"],
                     "nombre": persona["nombre"],
                     "DNI": persona["dni"],
                     "habilitado": persona["habilitado"],
-                    "id_turno": turno["id"],
                     "fecha": turno["fecha"],
                     "hora": turno["hora"].strftime("%H:%M"),
                     "estado": turno["estado"]
